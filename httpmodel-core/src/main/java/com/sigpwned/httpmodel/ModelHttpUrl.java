@@ -19,6 +19,8 @@
  */
 package com.sigpwned.httpmodel;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -67,6 +69,14 @@ public class ModelHttpUrl {
       return false;
     ModelHttpUrl other = (ModelHttpUrl) obj;
     return Objects.equals(path, other.path) && Objects.equals(queryString, other.queryString);
+  }
+
+  /**
+   * @param baseUrl Base URL for the absolute URL. Should not end with "/".
+   * @throws MalformedURLException If the final URL is not valid
+   */
+  public URL toUrl(String baseUrl) throws MalformedURLException {
+    return new URL(baseUrl + toString());
   }
 
   @Override

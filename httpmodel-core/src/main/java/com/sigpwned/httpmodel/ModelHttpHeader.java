@@ -29,7 +29,7 @@ public class ModelHttpHeader {
   private final String name;
 
   /**
-   * Assumed to be of ISO-8859-1
+   * Assumes ISO-8859-1
    */
   private final String value;
 
@@ -38,7 +38,7 @@ public class ModelHttpHeader {
       throw new NullPointerException();
     if (value == null)
       throw new NullPointerException();
-    this.name = name;
+    this.name = name.toLowerCase();
     this.value = value;
   }
 
@@ -75,6 +75,6 @@ public class ModelHttpHeader {
 
   @Override
   public String toString() {
-    return "ModelHttpHeader [name=" + name + ", value=" + value + "]";
+    return getName() + ": " + getValue();
   }
 }

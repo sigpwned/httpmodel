@@ -51,8 +51,8 @@ public class ModelHttpEntity {
   /**
    * @return the type
    */
-  public ModelHttpMediaType getType() {
-    return type;
+  public Optional<ModelHttpMediaType> getType() {
+    return Optional.ofNullable(type);
   }
 
   /**
@@ -76,8 +76,8 @@ public class ModelHttpEntity {
   }
 
   public Reader readChars(Charset defaultCharset) {
-    return new InputStreamReader(readBytes(), Optional.ofNullable(getType())
-        .flatMap(ModelHttpMediaType::getCharset).orElse(defaultCharset));
+    return new InputStreamReader(readBytes(),
+        getType().flatMap(ModelHttpMediaType::getCharset).orElse(defaultCharset));
   }
 
   public String toString(Charset defaultCharset) {

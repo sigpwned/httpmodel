@@ -61,7 +61,7 @@ public class ModelHttpMediaType {
       throw new IllegalArgumentException("not enough parts");
 
     String type = types[0].toLowerCase();
-    String subtype = types[1].toUpperCase();
+    String subtype = types[1].toLowerCase();
 
     Charset charset;
     if (paramsString != null && !paramsString.isEmpty()) {
@@ -118,7 +118,7 @@ public class ModelHttpMediaType {
     if (subtype == null)
       throw new NullPointerException();
     this.type = type.toLowerCase();
-    this.subtype = subtype.toUpperCase();
+    this.subtype = subtype.toLowerCase();
     this.charset = charset;
   }
 

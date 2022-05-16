@@ -89,7 +89,10 @@ public class ModelHttpQueryString {
 
     @Override
     public String toString() {
-      return "Parameter [name=" + name + ", value=" + value + "]";
+      String result = ModelHttpEncodings.urlencode(getName());
+      if (getValue() != null)
+        result = result + "=" + ModelHttpEncodings.urlencode(getValue());
+      return result;
     }
   }
 
