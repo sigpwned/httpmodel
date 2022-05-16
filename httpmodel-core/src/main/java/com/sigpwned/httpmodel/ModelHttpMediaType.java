@@ -32,12 +32,6 @@ import org.slf4j.LoggerFactory;
 public class ModelHttpMediaType {
   private static final Logger LOGGER = LoggerFactory.getLogger(ModelHttpMediaType.class);
 
-  public static final ModelHttpMediaType APPLICATION_OCTET_STREAM =
-      ModelHttpMediaType.of("application", "octet-stream");
-
-  public static final ModelHttpMediaType APPLICATION_X_WWW_FORM_URLENCODED =
-      ModelHttpMediaType.of("application", "x-www-form-urlencoded");
-
   public static final String WILDCARD = "*";
 
   private static final String CHARSET = "charset";

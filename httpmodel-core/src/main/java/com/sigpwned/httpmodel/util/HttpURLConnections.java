@@ -26,9 +26,15 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import com.sigpwned.httpmodel.ModelHttpEntity;
 import com.sigpwned.httpmodel.ModelHttpHeader;
+import com.sigpwned.httpmodel.ModelHttpMediaType;
 import com.sigpwned.httpmodel.ModelHttpRequest;
+import com.sigpwned.httpmodel.ModelHttpResponse;
 
 /**
  * Converts model objects to and from the Java 11 built-in HTTP client implementation.
@@ -47,7 +53,7 @@ public final class HttpURLConnections {
    * @return
    * @throws MalformedURLException
    */
-  public static HttpURLConnection prepare(String baseUrl, ModelHttpRequest request)
+  public static HttpURLConnection fromRequest(String baseUrl, ModelHttpRequest request)
       throws IOException {
     URL url = request.getUrl().toUrl(baseUrl);
 
@@ -75,5 +81,53 @@ public final class HttpURLConnections {
     }
 
     return result;
+  }
+
+  /**
+   * Converts a {@link HttpURLConnection} to a {@link ModelHttpResponse}. Note that this method will
+   * make an HTTP request with the connection if the request has not already been made.
+   * 
+   * @throws IOException
+   */
+  public static ModelHttpResponse toResponse(HttpURLConnection cn) throws IOException {
+    int statusCode = cn.getResponseCode();
+
+    List<ModelHttpHeader> headers = new ArrayList<>();
+    for (Map.Entry<String, List<String>> e : cn.getHeaderFields().entrySet()) {
+      String headerName = e.getKey();
+      List<String> headerValues = e.getValue();
+      for (String headerValue : headerValues) {
+        headers.add(ModelHttpHeader.of(headerName, headerValue));
+      }
+    }
+
+    ModelHttpHeader contentTypeHeader =
+        headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
+            .findFirst().orElse(null);
+    ModelHttpHeader contentLengthHeader =
+        headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_LENGTH))
+            .findFirst().orElse(null);
+    ModelHttpHeader transferEncodingHeader =
+        headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.TRANSFER_ENCODING))
+            .findFirst().orElse(null);
+
+    ModelHttpEntity entity;
+    if (contentTypeHeader != null || contentLengthHeader != null
+        || transferEncodingHeader != null) {
+      ModelHttpMediaType contentType = Optional.ofNullable(contentTypeHeader)
+          .map(ModelHttpHeader::getValue).map(ModelHttpMediaType::fromString)
+          .orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM);
+
+      byte[] data;
+      try (InputStream in = cn.getInputStream()) {
+        data = MoreByteStreams.toByteArray(in);
+      }
+
+      entity = ModelHttpEntity.of(contentType, data);
+    } else {
+      entity = null;
+    }
+
+    return ModelHttpResponse.of(statusCode, headers, entity);
   }
 }

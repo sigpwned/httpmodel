@@ -36,8 +36,12 @@ import com.sigpwned.httpmodel.ModelHttpRequest;
 import com.sigpwned.httpmodel.ModelHttpResponse;
 import com.sigpwned.httpmodel.ModelHttpUrl;
 import com.sigpwned.httpmodel.util.ModelHttpHeaderNames;
+import com.sigpwned.httpmodel.util.ModelHttpMediaTypes;
 import com.sigpwned.httpmodel.util.MoreByteStreams;
 
+/**
+ * This is server side.
+ */
 public final class HttpModelServlets {
   private HttpModelServlets() {}
 
@@ -66,20 +70,31 @@ public final class HttpModelServlets {
       }
     }
 
-    ModelHttpMediaType type =
+    ModelHttpHeader contentTypeHeader =
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
-            .map(ModelHttpHeader::getValue).map(ModelHttpMediaType::fromString).findFirst()
-            .orElse(null);
-
-    byte[] entityBody;
-    try (InputStream in = request.getInputStream()) {
-      entityBody = MoreByteStreams.toByteArray(in);
-    }
+            .findFirst().orElse(null);
+    ModelHttpHeader contentLengthHeader =
+        headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_LENGTH))
+            .findFirst().orElse(null);
+    ModelHttpHeader transferEncodingHeader =
+        headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.TRANSFER_ENCODING))
+            .findFirst().orElse(null);
 
     ModelHttpEntity entity;
-    if (type != null || entityBody.length != 0) {
+    if (contentTypeHeader != null || contentLengthHeader != null
+        || transferEncodingHeader != null) {
+      ModelHttpMediaType type =
+          headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
+              .map(ModelHttpHeader::getValue).map(ModelHttpMediaType::fromString).findFirst()
+              .orElse(null);
+
+      byte[] entityBody;
+      try (InputStream in = request.getInputStream()) {
+        entityBody = MoreByteStreams.toByteArray(in);
+      }
+
       entity = ModelHttpEntity.of(
-          Optional.ofNullable(type).orElse(ModelHttpMediaType.APPLICATION_OCTET_STREAM),
+          Optional.ofNullable(type).orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM),
           entityBody);
     } else {
       entity = null;
@@ -95,7 +110,6 @@ public final class HttpModelServlets {
    */
   public static HttpServletResponse fromModelResponse(HttpServletResponse result,
       ModelHttpResponse response) throws IOException {
-
     result.setStatus(response.getStatusCode());
 
     for (ModelHttpHeader header : response.getHeaders()) {
