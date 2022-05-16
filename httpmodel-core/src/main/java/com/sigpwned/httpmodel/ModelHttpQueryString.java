@@ -17,39 +17,37 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.entity;
+package com.sigpwned.httpmodel;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import com.sigpwned.httpmodel.ModelHttpEntity;
 import com.sigpwned.httpmodel.util.ModelHttpEncodings;
 
-public class ModelHttpFormData {
+public class ModelHttpQueryString {
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
   private static final Pattern EQUALS = Pattern.compile("=");
 
-  public static class Entry {
-    public static Entry fromString(String nv) {
+  public static class Parameter {
+    public static Parameter fromString(String nv) {
       String[] parts = EQUALS.split(nv, 2);
       String n = ModelHttpEncodings.urldecode(parts[0]);
       String v = parts.length == 2 ? ModelHttpEncodings.urldecode(parts[1]) : "";
-      return Entry.of(n, v);
+      return Parameter.of(n, v);
     }
 
-    public static Entry of(String name, String value) {
-      return new Entry(name, value);
+    public static Parameter of(String name, String value) {
+      return new Parameter(name, value);
     }
 
     private final String name;
     private final String value;
 
-    public Entry(String name, String value) {
+    public Parameter(String name, String value) {
       if (name == null)
         throw new NullPointerException();
       if (value == null)
@@ -85,48 +83,43 @@ public class ModelHttpFormData {
         return false;
       if (getClass() != obj.getClass())
         return false;
-      Entry other = (Entry) obj;
+      Parameter other = (Parameter) obj;
       return Objects.equals(name, other.name) && Objects.equals(value, other.value);
     }
 
     @Override
     public String toString() {
-      return new StringBuilder().append(ModelHttpEncodings.urlencode(getName())).append("=")
-          .append(ModelHttpEncodings.urlencode(getValue())).toString();
+      return "Parameter [name=" + name + ", value=" + value + "]";
     }
   }
 
-  public static ModelHttpFormData fromEntity(ModelHttpEntity entity) {
-    return fromString(entity.toString(StandardCharsets.UTF_8));
+  public static ModelHttpQueryString fromString(String s) {
+    return ModelHttpQueryString.of(AMPERSAND.splitAsStream(s).filter(nv -> !nv.isEmpty())
+        .map(Parameter::fromString).collect(toList()));
   }
 
-  public static ModelHttpFormData fromString(String s) {
-    return ModelHttpFormData.of(AMPERSAND.splitAsStream(s).filter(nv -> !nv.isEmpty())
-        .map(Entry::fromString).collect(toList()));
+  public static ModelHttpQueryString of(List<Parameter> entries) {
+    return new ModelHttpQueryString(entries);
   }
 
-  public static ModelHttpFormData of(List<Entry> entries) {
-    return new ModelHttpFormData(entries);
-  }
+  private final List<Parameter> parameters;
 
-  private final List<Entry> entries;
-
-  public ModelHttpFormData(List<Entry> entries) {
+  public ModelHttpQueryString(List<Parameter> entries) {
     if (entries == null)
       throw new NullPointerException();
-    this.entries = unmodifiableList(entries);
+    this.parameters = unmodifiableList(entries);
   }
 
   /**
    * @return the entries
    */
-  public List<Entry> getEntries() {
-    return entries;
+  public List<Parameter> getParameters() {
+    return parameters;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(entries);
+    return Objects.hash(parameters);
   }
 
   @Override
@@ -137,12 +130,12 @@ public class ModelHttpFormData {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ModelHttpFormData other = (ModelHttpFormData) obj;
-    return Objects.equals(entries, other.entries);
+    ModelHttpQueryString other = (ModelHttpQueryString) obj;
+    return Objects.equals(parameters, other.parameters);
   }
 
   @Override
   public String toString() {
-    return getEntries().stream().map(Entry::toString).collect(joining("&"));
+    return getParameters().stream().map(Parameter::toString).collect(joining("&"));
   }
 }

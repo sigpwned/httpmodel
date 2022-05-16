@@ -1,25 +1,41 @@
+/*-
+ * =================================LICENSE_START==================================
+ * httpmodel-core
+ * ====================================SECTION=====================================
+ * Copyright (C) 2022 Andy Boothe
+ * ====================================SECTION=====================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ==================================LICENSE_END===================================
+ */
 package com.sigpwned.httpmodel;
 
-import static java.util.Collections.unmodifiableList;
-import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ModelHttpUrl {
-  public static ModelHttpUrl of(String path, List<ModelHttpQueryParameter> parameters) {
-    return new ModelHttpUrl(path, parameters);
+  public static ModelHttpUrl of(String path, ModelHttpQueryString queryString) {
+    return new ModelHttpUrl(path, queryString);
   }
 
   private final String path;
-  
-  private final List<ModelHttpQueryParameter> parameters;
 
-  public ModelHttpUrl(String path, List<ModelHttpQueryParameter> parameters) {
+  private final ModelHttpQueryString queryString;
+
+  public ModelHttpUrl(String path, ModelHttpQueryString queryString) {
     if (path == null)
       throw new NullPointerException();
-    if (parameters == null)
-      throw new NullPointerException();
     this.path = path;
-    this.parameters = unmodifiableList(parameters);
+    this.queryString = queryString;
   }
 
   /**
@@ -32,13 +48,13 @@ public class ModelHttpUrl {
   /**
    * @return the parameters
    */
-  public List<ModelHttpQueryParameter> getParameters() {
-    return parameters;
+  public Optional<ModelHttpQueryString> getQueryString() {
+    return Optional.ofNullable(queryString);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(parameters, path);
+    return Objects.hash(path, queryString);
   }
 
   @Override
@@ -50,11 +66,15 @@ public class ModelHttpUrl {
     if (getClass() != obj.getClass())
       return false;
     ModelHttpUrl other = (ModelHttpUrl) obj;
-    return Objects.equals(parameters, other.parameters) && Objects.equals(path, other.path);
+    return Objects.equals(path, other.path) && Objects.equals(queryString, other.queryString);
   }
 
   @Override
   public String toString() {
-    return "ModelHttpUrl [path=" + path + ", parameters=" + parameters + "]";
+    String result = getPath();
+    if (getQueryString().isPresent()) {
+      result = result + "?" + getQueryString().get().toString();
+    }
+    return result;
   }
 }

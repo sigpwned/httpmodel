@@ -1,17 +1,36 @@
+/*-
+ * =================================LICENSE_START==================================
+ * httpmodel-core
+ * ====================================SECTION=====================================
+ * Copyright (C) 2022 Andy Boothe
+ * ====================================SECTION=====================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ==================================LICENSE_END===================================
+ */
 package com.sigpwned.httpmodel;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import com.sigpwned.httpmodel.util.MoreByteStreams;
+import com.sigpwned.httpmodel.util.MoreCharStreams;
 
 public class ModelHttpEntity {
   public static ModelHttpEntity of(ModelHttpMediaType type, byte[] data) {
@@ -48,21 +67,12 @@ public class ModelHttpEntity {
   }
 
   public byte[] toByteArray() {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-
     try {
-      byte[] buf = new byte[4096];
-      try (InputStream in = readBytes()) {
-        for (int nread = in.read(buf); nread != -1; nread = in.read(buf)) {
-          out.write(buf, 0, nread);
-        }
-      }
+      return MoreByteStreams.toByteArray(readBytes());
     } catch (IOException e) {
-      // This should never happen, since it's all in memory.
+      // This should never happen since it's all in memory
       throw new UncheckedIOException(e);
     }
-
-    return out.toByteArray();
   }
 
   public Reader readChars(Charset defaultCharset) {
@@ -71,21 +81,12 @@ public class ModelHttpEntity {
   }
 
   public String toString(Charset defaultCharset) {
-    StringWriter out = new StringWriter();
-
     try {
-      char[] buf = new char[4096];
-      try (Reader in = readChars(defaultCharset)) {
-        for (int nread = in.read(buf); nread != -1; nread = in.read(buf)) {
-          out.write(buf, 0, nread);
-        }
-      }
+      return MoreCharStreams.toString(readChars(defaultCharset));
     } catch (IOException e) {
-      // This should never happen, since it's all in memory.
+      // Should never happen since this is all in memory
       throw new UncheckedIOException(e);
     }
-
-    return out.toString();
   }
 
   public int length() {

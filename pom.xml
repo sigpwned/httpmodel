@@ -193,6 +193,7 @@
 
     <modules>
         <module>httpmodel-core</module>
+        <module>httpmodel-servlet</module>
     </modules>
 
     <!-- For releasing to maven central -->

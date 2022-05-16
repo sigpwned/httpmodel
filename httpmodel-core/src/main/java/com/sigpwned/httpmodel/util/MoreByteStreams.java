@@ -19,12 +19,37 @@
  */
 package com.sigpwned.httpmodel.util;
 
-public final class ModelHttpVersions {
-  private ModelHttpVersions() {}
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-  public static final String HTTP_1_0 = "HTTP/1.0";
+public final class MoreByteStreams {
+  private MoreByteStreams() {}
 
-  public static final String HTTP_1_1 = "HTTP/1.1";
+  /**
+   * Reads the data from the given {@link InputStream} and returns it as a byte array.
+   * 
+   * @throws IOException
+   */
+  public static byte[] toByteArray(InputStream in) throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-  public static final String HTTP_2 = "HTTP/2";
+    drain(in, out);
+
+    return out.toByteArray();
+  }
+
+  /**
+   * Reads the data from the given {@link InputStream} and writes it to the given
+   * {@link OutputStream}
+   * 
+   * @throws IOException
+   */
+  public static void drain(InputStream in, OutputStream out) throws IOException {
+    byte[] buf = new byte[4096];
+    for (int nread = in.read(buf); nread != -1; nread = in.read(buf)) {
+      out.write(buf, 0, nread);
+    }
+  }
 }
