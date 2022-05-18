@@ -33,7 +33,7 @@ import com.sigpwned.httpmodel.ModelHttpQueryString.Parameter;
 import com.sigpwned.httpmodel.util.ModelHttpEncodings;
 
 /**
- * Models an HTTP query string, e.g., alpha=bravo&charlie=delta
+ * Models an HTTP query string, e.g., alpha=bravo&amp;charlie=delta
  */
 public class ModelHttpQueryString implements Iterable<Parameter> {
   private static final Pattern AMPERSAND = Pattern.compile("&");

@@ -55,7 +55,7 @@ public class ModelHttpServletsTest {
     when(req.getRequestURI()).thenReturn("/path/to/example");
     when(req.getHeaderNames()).thenReturn(emptyEnumeration());
 
-    ModelHttpRequest request = ModelHttpServlets.toModelRequest(req);
+    ModelHttpRequest request = ModelHttpServlets.fromRequest(req);
 
     assertThat(request, is(ModelHttpRequest.of(ModelHttpVersions.HTTP_1_1, ModelHttpMethods.GET,
         ModelHttpUrl.fromString("http://localhost:8080/path/to/example"), Optional.empty())));
@@ -88,7 +88,7 @@ public class ModelHttpServletsTest {
       }
     });
 
-    ModelHttpServlets.fromModelResponse(res, response);
+    ModelHttpServlets.toResponse(res, response);
 
     verify(res).setContentType(ModelHttpMediaTypes.TEXT_PLAIN.toString());
     verify(res).setContentLength(bytes.length);

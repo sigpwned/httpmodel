@@ -48,14 +48,9 @@ public final class ModelHttpURLConnections {
    * that this method may send the given request, which is unavoidable because a request body is
    * potentially included.
    * 
-   * @param baseUrl The base URL to send the request to. The request only contains path and query
-   *        string information, so a base URL is required. Example: https://en.wikipedia.org
-   * @param request The request to convert
-   * @return
    * @throws MalformedURLException
    */
-  public static HttpURLConnection fromRequest(String baseUrl, ModelHttpRequest request)
-      throws IOException {
+  public static HttpURLConnection toRequest(ModelHttpRequest request) throws IOException {
     URL url = request.getUrl().toUrl();
 
     HttpURLConnection result = (HttpURLConnection) url.openConnection();
@@ -90,7 +85,7 @@ public final class ModelHttpURLConnections {
    * 
    * @throws IOException
    */
-  public static ModelHttpResponse toResponse(HttpURLConnection cn) throws IOException {
+  public static ModelHttpResponse fromResponse(HttpURLConnection cn) throws IOException {
     int statusCode = cn.getResponseCode();
 
     List<ModelHttpHeaders.Header> headers = new ArrayList<>();

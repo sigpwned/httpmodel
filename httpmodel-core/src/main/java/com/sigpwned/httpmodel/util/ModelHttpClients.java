@@ -45,13 +45,9 @@ public final class ModelHttpClients {
   /**
    * Converts the given request into an {@link HttpRequest} object. Does not send the request.
    * 
-   * @param baseUrl The base URL to send the request to. The request only contains path and query
-   *        string information, so a base URL is required. Example: https://en.wikipedia.org
-   * @param request The request to convert
-   * @return
    * @throws MalformedURLException
    */
-  public static HttpRequest fromRequest(ModelHttpRequest request) throws MalformedURLException {
+  public static HttpRequest toRequest(ModelHttpRequest request) throws MalformedURLException {
     URI uri;
     try {
       uri = request.getUrl().toUrl().toURI();
@@ -79,7 +75,7 @@ public final class ModelHttpClients {
   /**
    * Converts an {@link HttpResponse} to a {@link ModelHttpResponse}.
    */
-  public static ModelHttpResponse toResponse(HttpResponse<byte[]> response) {
+  public static ModelHttpResponse fromResponse(HttpResponse<byte[]> response) {
     int statusCode = response.statusCode();
 
     List<ModelHttpHeaders.Header> headers = new ArrayList<>();

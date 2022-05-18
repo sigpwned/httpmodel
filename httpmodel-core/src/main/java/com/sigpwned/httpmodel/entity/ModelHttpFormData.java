@@ -134,7 +134,7 @@ public class ModelHttpFormData implements Iterable<Entry> {
   }
 
   /**
-   * Parses a valid form string, e.g., alpha=bravo&charlie=delta
+   * Parses a valid form string, e.g., alpha=bravo&amp;charlie=delta
    * 
    * @throws IllegalArgumentException if the form string is not valid
    *

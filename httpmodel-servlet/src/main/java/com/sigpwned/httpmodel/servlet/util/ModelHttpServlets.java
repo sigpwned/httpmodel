@@ -50,7 +50,7 @@ public final class ModelHttpServlets {
   /**
    * Converts the given {@link HttpServletRequest} into a {@link ModelHttpRequest}.
    */
-  public static ModelHttpRequest toModelRequest(HttpServletRequest request) throws IOException {
+  public static ModelHttpRequest fromRequest(HttpServletRequest request) throws IOException {
     ModelHttpQueryString queryString = Optional.ofNullable(request.getQueryString())
         .map(ModelHttpQueryString::fromString).orElse(null);
 
@@ -113,7 +113,7 @@ public final class ModelHttpServlets {
    * 
    * @throws IOException
    */
-  public static HttpServletResponse fromModelResponse(HttpServletResponse result,
+  public static HttpServletResponse toResponse(HttpServletResponse result,
       ModelHttpResponse response) throws IOException {
     result.setStatus(response.getStatusCode());
 
