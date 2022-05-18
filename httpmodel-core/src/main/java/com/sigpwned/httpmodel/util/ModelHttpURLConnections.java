@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import com.sigpwned.httpmodel.ModelHttpEntity;
-import com.sigpwned.httpmodel.ModelHttpHeader;
+import com.sigpwned.httpmodel.ModelHttpHeaders;
 import com.sigpwned.httpmodel.ModelHttpMediaType;
 import com.sigpwned.httpmodel.ModelHttpRequest;
 import com.sigpwned.httpmodel.ModelHttpResponse;
@@ -62,7 +62,7 @@ public final class ModelHttpURLConnections {
 
     result.setRequestMethod(request.getMethod());
 
-    for (ModelHttpHeader header : request.getHeaders())
+    for (ModelHttpHeaders.Header header : request.getHeaders())
       result.setRequestProperty(header.getName(), header.getValue());
 
     if (request.getEntity().isPresent()) {
@@ -93,22 +93,22 @@ public final class ModelHttpURLConnections {
   public static ModelHttpResponse toResponse(HttpURLConnection cn) throws IOException {
     int statusCode = cn.getResponseCode();
 
-    List<ModelHttpHeader> headers = new ArrayList<>();
+    List<ModelHttpHeaders.Header> headers = new ArrayList<>();
     for (Map.Entry<String, List<String>> e : cn.getHeaderFields().entrySet()) {
       String headerName = e.getKey();
       List<String> headerValues = e.getValue();
       for (String headerValue : headerValues) {
-        headers.add(ModelHttpHeader.of(headerName, headerValue));
+        headers.add(ModelHttpHeaders.Header.of(headerName, headerValue));
       }
     }
 
-    ModelHttpHeader contentTypeHeader =
+    ModelHttpHeaders.Header contentTypeHeader =
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
             .findFirst().orElse(null);
-    ModelHttpHeader contentLengthHeader =
+    ModelHttpHeaders.Header contentLengthHeader =
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_LENGTH))
             .findFirst().orElse(null);
-    ModelHttpHeader transferEncodingHeader =
+    ModelHttpHeaders.Header transferEncodingHeader =
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.TRANSFER_ENCODING))
             .findFirst().orElse(null);
 
@@ -116,7 +116,7 @@ public final class ModelHttpURLConnections {
     if (contentTypeHeader != null || contentLengthHeader != null
         || transferEncodingHeader != null) {
       ModelHttpMediaType contentType = Optional.ofNullable(contentTypeHeader)
-          .map(ModelHttpHeader::getValue).map(ModelHttpMediaType::fromString)
+          .map(ModelHttpHeaders.Header::getValue).map(ModelHttpMediaType::fromString)
           .orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM);
 
       byte[] data;
@@ -129,6 +129,6 @@ public final class ModelHttpURLConnections {
       entity = null;
     }
 
-    return ModelHttpResponse.of(statusCode, headers, entity);
+    return ModelHttpResponse.of(statusCode, ModelHttpHeaders.of(headers), entity);
   }
 }

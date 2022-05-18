@@ -19,7 +19,6 @@
  */
 package com.sigpwned.httpmodel;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import com.sigpwned.httpmodel.util.ModelHttpMethods;
@@ -31,21 +30,21 @@ import com.sigpwned.httpmodel.util.ModelHttpVersions;
 public class ModelHttpRequest {
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
       ModelHttpEntity entity) {
-    return of(version, method, url, List.of(), entity);
+    return of(version, method, url, ModelHttpHeaders.of(), entity);
   }
 
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
-      List<ModelHttpHeader> headers, ModelHttpEntity entity) {
+      ModelHttpHeaders headers, ModelHttpEntity entity) {
     return new ModelHttpRequest(version, method, url, headers, entity);
   }
 
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
       Optional<ModelHttpEntity> entity) {
-    return of(version, method, url, List.of(), entity.orElse(null));
+    return of(version, method, url, ModelHttpHeaders.of(), entity.orElse(null));
   }
 
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
-      List<ModelHttpHeader> headers, Optional<ModelHttpEntity> entity) {
+      ModelHttpHeaders headers, Optional<ModelHttpEntity> entity) {
     return new ModelHttpRequest(version, method, url, headers, entity.orElse(null));
   }
 
@@ -61,12 +60,12 @@ public class ModelHttpRequest {
 
   private final ModelHttpUrl url;
 
-  private final List<ModelHttpHeader> headers;
+  private final ModelHttpHeaders headers;
 
   private final ModelHttpEntity entity;
 
-  public ModelHttpRequest(String version, String method, ModelHttpUrl url,
-      List<ModelHttpHeader> headers, ModelHttpEntity entity) {
+  public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
+      ModelHttpEntity entity) {
     if (version == null)
       throw new NullPointerException();
     if (method == null)
@@ -106,7 +105,7 @@ public class ModelHttpRequest {
   /**
    * @return the headers
    */
-  public List<ModelHttpHeader> getHeaders() {
+  public ModelHttpHeaders getHeaders() {
     return headers;
   }
 

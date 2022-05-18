@@ -19,8 +19,6 @@
  */
 package com.sigpwned.httpmodel;
 
-import static java.util.Collections.unmodifiableList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import com.sigpwned.httpmodel.util.ModelHttpStatusCodes;
@@ -30,15 +28,15 @@ import com.sigpwned.httpmodel.util.ModelHttpStatusCodes;
  */
 public class ModelHttpResponse {
   public static ModelHttpResponse of(int statusCode, ModelHttpEntity entity) {
-    return of(statusCode, List.of(), entity);
+    return of(statusCode, ModelHttpHeaders.of(), entity);
   }
 
-  public static ModelHttpResponse of(int statusCode, List<ModelHttpHeader> headers,
+  public static ModelHttpResponse of(int statusCode, ModelHttpHeaders headers,
       ModelHttpEntity entity) {
     return new ModelHttpResponse(statusCode, headers, entity);
   }
 
-  public static ModelHttpResponse of(int statusCode, List<ModelHttpHeader> headers,
+  public static ModelHttpResponse of(int statusCode, ModelHttpHeaders headers,
       Optional<ModelHttpEntity> entity) {
     return new ModelHttpResponse(statusCode, headers, entity.orElse(null));
   }
@@ -48,15 +46,15 @@ public class ModelHttpResponse {
    */
   private final int statusCode;
 
-  private final List<ModelHttpHeader> headers;
+  private final ModelHttpHeaders headers;
 
   private final ModelHttpEntity entity;
 
-  public ModelHttpResponse(int statusCode, List<ModelHttpHeader> headers, ModelHttpEntity entity) {
+  public ModelHttpResponse(int statusCode, ModelHttpHeaders headers, ModelHttpEntity entity) {
     if (headers == null)
       throw new NullPointerException();
     this.statusCode = statusCode;
-    this.headers = unmodifiableList(headers);
+    this.headers = headers;
     this.entity = entity;
   }
 
@@ -70,7 +68,7 @@ public class ModelHttpResponse {
   /**
    * @return the headers
    */
-  public List<ModelHttpHeader> getHeaders() {
+  public ModelHttpHeaders getHeaders() {
     return headers;
   }
 

@@ -24,18 +24,21 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import com.sigpwned.httpmodel.ModelHttpEntity;
+import com.sigpwned.httpmodel.entity.ModelHttpFormData.Entry;
 import com.sigpwned.httpmodel.util.ModelHttpEncodings;
 import com.sigpwned.httpmodel.util.ModelHttpMediaTypes;
 
 /**
  * Models an HTTP entity of type application/x-www-form-urlencoded.
  */
-public class ModelHttpFormData {
+public class ModelHttpFormData implements Iterable<Entry> {
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
   private static final Pattern EQUALS = Pattern.compile("=");
@@ -167,11 +170,11 @@ public class ModelHttpFormData {
   }
 
   public Optional<Entry> findFirstEntryByName(String name) {
-    return getEntries().stream().filter(e -> e.getName().equals(name)).findFirst();
+    return stream().filter(e -> e.getName().equals(name)).findFirst();
   }
 
   public List<Entry> findAllEntriesByName(String name) {
-    return getEntries().stream().filter(e -> e.getName().equals(name)).collect(toList());
+    return stream().filter(e -> e.getName().equals(name)).collect(toList());
   }
 
   @Override
@@ -202,6 +205,15 @@ public class ModelHttpFormData {
    */
   @Override
   public String toString() {
-    return getEntries().stream().map(Entry::toString).collect(joining("&"));
+    return stream().map(Entry::toString).collect(joining("&"));
+  }
+
+  @Override
+  public Iterator<Entry> iterator() {
+    return getEntries().iterator();
+  }
+
+  public Stream<Entry> stream() {
+    return getEntries().stream();
   }
 }

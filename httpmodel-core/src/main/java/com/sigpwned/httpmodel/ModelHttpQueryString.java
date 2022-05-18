@@ -23,16 +23,19 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import com.sigpwned.httpmodel.ModelHttpQueryString.Parameter;
 import com.sigpwned.httpmodel.util.ModelHttpEncodings;
 
 /**
  * Models an HTTP query string, e.g., alpha=bravo&charlie=delta
  */
-public class ModelHttpQueryString {
+public class ModelHttpQueryString implements Iterable<Parameter> {
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
   private static final Pattern EQUALS = Pattern.compile("=");
@@ -160,11 +163,11 @@ public class ModelHttpQueryString {
   }
 
   public Optional<Parameter> findFirstParameterByName(String name) {
-    return getParameters().stream().filter(p -> p.getName().equals(name)).findFirst();
+    return stream().filter(p -> p.getName().equals(name)).findFirst();
   }
 
   public List<Parameter> findAllParametersByName(String name) {
-    return getParameters().stream().filter(p -> p.getName().equals(name)).collect(toList());
+    return stream().filter(p -> p.getName().equals(name)).collect(toList());
   }
 
   @Override
@@ -191,6 +194,15 @@ public class ModelHttpQueryString {
    */
   @Override
   public String toString() {
-    return getParameters().stream().map(Parameter::toString).collect(joining("&"));
+    return stream().map(Parameter::toString).collect(joining("&"));
+  }
+
+  @Override
+  public Iterator<Parameter> iterator() {
+    return getParameters().iterator();
+  }
+
+  public Stream<Parameter> stream() {
+    return getParameters().stream();
   }
 }

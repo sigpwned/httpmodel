@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.sigpwned.httpmodel.ModelHttpAuthority;
 import com.sigpwned.httpmodel.ModelHttpEntity;
-import com.sigpwned.httpmodel.ModelHttpHeader;
+import com.sigpwned.httpmodel.ModelHttpHeaders;
 import com.sigpwned.httpmodel.ModelHttpHost;
 import com.sigpwned.httpmodel.ModelHttpMediaType;
 import com.sigpwned.httpmodel.ModelHttpQueryString;
@@ -63,7 +63,7 @@ public final class ModelHttpServlets {
 
     String version = request.getProtocol();
 
-    List<ModelHttpHeader> headers = new ArrayList<>();
+    List<ModelHttpHeaders.Header> headers = new ArrayList<>();
 
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
@@ -71,17 +71,17 @@ public final class ModelHttpServlets {
       Enumeration<String> headerValues = request.getHeaders(headerName);
       while (headerValues.hasMoreElements()) {
         String headerValue = headerValues.nextElement();
-        headers.add(ModelHttpHeader.of(headerName.toLowerCase(), headerValue));
+        headers.add(ModelHttpHeaders.Header.of(headerName.toLowerCase(), headerValue));
       }
     }
 
-    ModelHttpHeader contentTypeHeader =
+    ModelHttpHeaders.Header contentTypeHeader =
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
             .findFirst().orElse(null);
-    ModelHttpHeader contentLengthHeader =
+    ModelHttpHeaders.Header contentLengthHeader =
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_LENGTH))
             .findFirst().orElse(null);
-    ModelHttpHeader transferEncodingHeader =
+    ModelHttpHeaders.Header transferEncodingHeader =
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.TRANSFER_ENCODING))
             .findFirst().orElse(null);
 
@@ -90,8 +90,8 @@ public final class ModelHttpServlets {
         || transferEncodingHeader != null) {
       ModelHttpMediaType type =
           headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
-              .map(ModelHttpHeader::getValue).map(ModelHttpMediaType::fromString).findFirst()
-              .orElse(null);
+              .map(ModelHttpHeaders.Header::getValue).map(ModelHttpMediaType::fromString)
+              .findFirst().orElse(null);
 
       byte[] entityBody;
       try (InputStream in = request.getInputStream()) {
@@ -105,7 +105,7 @@ public final class ModelHttpServlets {
       entity = null;
     }
 
-    return ModelHttpRequest.of(version, method, url, headers, entity);
+    return ModelHttpRequest.of(version, method, url, ModelHttpHeaders.of(headers), entity);
   }
 
   /**
@@ -117,7 +117,7 @@ public final class ModelHttpServlets {
       ModelHttpResponse response) throws IOException {
     result.setStatus(response.getStatusCode());
 
-    for (ModelHttpHeader header : response.getHeaders()) {
+    for (ModelHttpHeaders.Header header : response.getHeaders()) {
       // TODO Encode headers?
       // See: https://stackoverflow.com/questions/324470/http-headers-encoding-decoding-in-java
       result.addHeader(header.getName(), header.getValue());
