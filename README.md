@@ -28,6 +28,8 @@ Users can convert back and forth between servlet objects like this:
         return ModelHttpServlets.toResponse(s, response);
     }
 
+This requires the `httpmodel-servlet` module.
+
 ### Java 11 Client
 
 Users can convert back and forth between Java 11 `HttpClient` objects like this:
@@ -40,6 +42,8 @@ Users can convert back and forth between Java 11 `HttpClient` objects like this:
         return ModelHttpClients.fromResponse(response);
     }
 
+This requires the `httpmodel-core` module.
+
 ### HttpURLConnection
 
 Users can convert back and forth between `HttpURLConnection` objects like this:
@@ -51,3 +55,5 @@ Users can convert back and forth between `HttpURLConnection` objects like this:
     public ModelHttpResponse convertFromHttpURLConnection(HttpURLConnection connection) {
         return ModelHttpURLConnections.fromResponse(connection);
     }
+
+This requires the `httpmodel-core` module.
