@@ -70,8 +70,6 @@ public class ModelHttpFormData {
     public Entry(String name, String value) {
       if (name == null)
         throw new NullPointerException();
-      if (value == null)
-        throw new NullPointerException();
       this.name = name;
       this.value = value;
     }
@@ -86,8 +84,8 @@ public class ModelHttpFormData {
     /**
      * @return the value
      */
-    public String getValue() {
-      return value;
+    public Optional<String> getValue() {
+      return Optional.ofNullable(value);
     }
 
     @Override
@@ -116,8 +114,10 @@ public class ModelHttpFormData {
      */
     @Override
     public String toString() {
-      return new StringBuilder().append(ModelHttpEncodings.urlencode(getName())).append("=")
-          .append(ModelHttpEncodings.urlencode(getValue())).toString();
+      String result = ModelHttpEncodings.urlencode(getName());
+      if (getValue().isPresent())
+        result = result + "=" + ModelHttpEncodings.urlencode(getValue().get());
+      return result;
     }
   }
 
@@ -166,14 +166,12 @@ public class ModelHttpFormData {
     return entries;
   }
 
-  public Optional<String> findFirstEntryByName(String name) {
-    return getEntries().stream().filter(e -> e.getName().equals(name)).map(Entry::getValue)
-        .findFirst();
+  public Optional<Entry> findFirstEntryByName(String name) {
+    return getEntries().stream().filter(e -> e.getName().equals(name)).findFirst();
   }
 
-  public List<String> findAllEntriesByName(String name) {
-    return getEntries().stream().filter(e -> e.getName().equals(name)).map(Entry::getValue)
-        .collect(toList());
+  public List<Entry> findAllEntriesByName(String name) {
+    return getEntries().stream().filter(e -> e.getName().equals(name)).collect(toList());
   }
 
   @Override
