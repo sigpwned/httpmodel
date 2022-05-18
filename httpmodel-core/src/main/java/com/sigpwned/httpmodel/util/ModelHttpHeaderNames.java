@@ -19,6 +19,9 @@
  */
 package com.sigpwned.httpmodel.util;
 
+/**
+ * Constants for common HTTP header names
+ */
 public final class ModelHttpHeaderNames {
   private ModelHttpHeaderNames() {}
 

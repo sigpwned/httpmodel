@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.sigpwned.httpmodel.ModelHttpAuthority;
 import com.sigpwned.httpmodel.ModelHttpEntity;
 import com.sigpwned.httpmodel.ModelHttpHeader;
+import com.sigpwned.httpmodel.ModelHttpHost;
 import com.sigpwned.httpmodel.ModelHttpMediaType;
 import com.sigpwned.httpmodel.ModelHttpQueryString;
 import com.sigpwned.httpmodel.ModelHttpRequest;
@@ -42,8 +44,8 @@ import com.sigpwned.httpmodel.util.MoreByteStreams;
 /**
  * This is server side.
  */
-public final class HttpModelServlets {
-  private HttpModelServlets() {}
+public final class ModelHttpServlets {
+  private ModelHttpServlets() {}
 
   /**
    * Converts the given {@link HttpServletRequest} into a {@link ModelHttpRequest}.
@@ -52,7 +54,10 @@ public final class HttpModelServlets {
     ModelHttpQueryString queryString = Optional.ofNullable(request.getQueryString())
         .map(ModelHttpQueryString::fromString).orElse(null);
 
-    ModelHttpUrl url = ModelHttpUrl.of(request.getRequestURI(), queryString);
+    ModelHttpUrl url = ModelHttpUrl.of(
+        request.getScheme(), ModelHttpAuthority
+            .of(ModelHttpHost.fromString(request.getServerName()), request.getServerPort()),
+        request.getRequestURI(), queryString);
 
     String method = request.getMethod().toUpperCase();
 

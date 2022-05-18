@@ -25,10 +25,28 @@ import java.util.Optional;
 import com.sigpwned.httpmodel.util.ModelHttpMethods;
 import com.sigpwned.httpmodel.util.ModelHttpVersions;
 
+/**
+ * Models an HTTP request
+ */
 public class ModelHttpRequest {
+  public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
+      ModelHttpEntity entity) {
+    return of(version, method, url, List.of(), entity);
+  }
+
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
       List<ModelHttpHeader> headers, ModelHttpEntity entity) {
     return new ModelHttpRequest(version, method, url, headers, entity);
+  }
+
+  public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
+      Optional<ModelHttpEntity> entity) {
+    return of(version, method, url, List.of(), entity.orElse(null));
+  }
+
+  public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
+      List<ModelHttpHeader> headers, Optional<ModelHttpEntity> entity) {
+    return new ModelHttpRequest(version, method, url, headers, entity.orElse(null));
   }
 
   /**
@@ -57,8 +75,8 @@ public class ModelHttpRequest {
       throw new NullPointerException();
     if (headers == null)
       throw new NullPointerException();
-    this.version = version;
-    this.method = method;
+    this.version = version.toUpperCase();
+    this.method = method.toUpperCase();
     this.url = url;
     this.headers = headers;
     this.entity = entity;

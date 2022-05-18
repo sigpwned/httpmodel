@@ -21,6 +21,11 @@ package com.sigpwned.httpmodel;
 
 import java.util.Objects;
 
+/**
+ * Models an HTTP header. This class assumes the name and value are valid ISO-8859-1 characters. In
+ * particular, no RFC 2047 escaping is done. This matches the behavior of several major Java HTTP
+ * frameworks. Header names are automatically lowercased.
+ */
 public class ModelHttpHeader {
   public static ModelHttpHeader of(String name, String value) {
     return new ModelHttpHeader(name, value);
@@ -73,6 +78,9 @@ public class ModelHttpHeader {
     return Objects.equals(name, other.name) && Objects.equals(value, other.value);
   }
 
+  /**
+   * Returns a stringized form of this header, e.g., name: value
+   */
   @Override
   public String toString() {
     return getName() + ": " + getValue();

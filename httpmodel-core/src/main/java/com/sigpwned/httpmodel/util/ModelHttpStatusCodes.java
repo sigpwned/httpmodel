@@ -19,6 +19,9 @@
  */
 package com.sigpwned.httpmodel.util;
 
+/**
+ * Constants for HTTP status codes
+ */
 public final class ModelHttpStatusCodes {
   private ModelHttpStatusCodes() {}
 
@@ -64,17 +67,17 @@ public final class ModelHttpStatusCodes {
   /**
    * HTTP Status-Code 300: Multiple Choices.
    */
-  public static final int MULT_CHOICE = 300;
+  public static final int MULTIPLE_CHOICES = 300;
 
   /**
    * HTTP Status-Code 301: Moved Permanently.
    */
-  public static final int MOVED_PERM = 301;
+  public static final int MOVED_PERMANENTLY = 301;
 
   /**
    * HTTP Status-Code 302: Temporary Redirect.
    */
-  public static final int MOVED_TEMP = 302;
+  public static final int FOUND = 302;
 
   /**
    * HTTP Status-Code 303: See Other.
@@ -90,6 +93,11 @@ public final class ModelHttpStatusCodes {
    * HTTP Status-Code 305: Use Proxy.
    */
   public static final int USE_PROXY = 305;
+
+  /**
+   * HTTP Status-Code 307: Temporary Redirect.
+   */
+  public static final int TEMPORARY_REDIRECT = 307;
 
   /* 4XX: client error */
 
@@ -121,7 +129,7 @@ public final class ModelHttpStatusCodes {
   /**
    * HTTP Status-Code 405: Method Not Allowed.
    */
-  public static final int BAD_METHOD = 405;
+  public static final int METHOD_NOT_ALLOWED = 405;
 
   /**
    * HTTP Status-Code 406: Not Acceptable.
@@ -131,7 +139,7 @@ public final class ModelHttpStatusCodes {
   /**
    * HTTP Status-Code 407: Proxy Authentication Required.
    */
-  public static final int PROXY_AUTH = 407;
+  public static final int PROXY_AUTHENTICATION_REQUIRED = 407;
 
   /**
    * HTTP Status-Code 408: Request Time-Out.
@@ -156,7 +164,7 @@ public final class ModelHttpStatusCodes {
   /**
    * HTTP Status-Code 412: Precondition Failed.
    */
-  public static final int PRECON_FAILED = 412;
+  public static final int PRECONDITION_FAILED = 412;
 
   /**
    * HTTP Status-Code 413: Request Entity Too Large.
@@ -166,12 +174,12 @@ public final class ModelHttpStatusCodes {
   /**
    * HTTP Status-Code 414: Request-URI Too Large.
    */
-  public static final int REQ_TOO_LONG = 414;
+  public static final int REQUEST_URI_TOO_LONG = 414;
 
   /**
    * HTTP Status-Code 415: Unsupported Media Type.
    */
-  public static final int UNSUPPORTED_TYPE = 415;
+  public static final int UNSUPPORTED_MEDIA_TYPE = 415;
 
   /**
    * HTTP Status-Code 422: Unprocessable Entity

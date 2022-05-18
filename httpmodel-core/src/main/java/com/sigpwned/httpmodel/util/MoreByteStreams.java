@@ -24,6 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Helper methods for dealing with byte streams
+ * 
+ * @see InputStream
+ * @see OutputStream
+ */
 public final class MoreByteStreams {
   private MoreByteStreams() {}
 

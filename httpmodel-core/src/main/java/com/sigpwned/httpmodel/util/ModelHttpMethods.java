@@ -19,6 +19,9 @@
  */
 package com.sigpwned.httpmodel.util;
 
+/**
+ * Constants for standard HTTP methods
+ */
 public final class ModelHttpMethods {
   private ModelHttpMethods() {}
 

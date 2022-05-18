@@ -22,6 +22,9 @@ package com.sigpwned.httpmodel.util;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Implements common encodings in the HTTP protocol.
+ */
 public final class ModelHttpEncodings {
   private ModelHttpEncodings() {}
 

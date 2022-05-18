@@ -26,12 +26,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * Models a MIME type.
+ */
 public class ModelHttpMediaType {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ModelHttpMediaType.class);
-
   public static final String WILDCARD = "*";
 
   private static final String CHARSET = "charset";
@@ -44,6 +43,13 @@ public class ModelHttpMediaType {
 
   private static final Pattern EQUALS = Pattern.compile("=");
 
+  /**
+   * Parses a valid mime type, e.g., text/plain; charset=utf-8.
+   *
+   * @throws IllegalArgumentException if the MIME type cannot be parsed
+   * 
+   * @see #toString()
+   */
   public static ModelHttpMediaType fromString(String s) {
     String[] parts = SEMICOLON.split(s.trim(), 2);
 
@@ -72,9 +78,7 @@ public class ModelHttpMediaType {
         try {
           charset = Charset.forName(charsetName);
         } catch (Exception e) {
-          if (LOGGER.isDebugEnabled())
-            LOGGER.debug("Ignoring invalid charset {}", charsetName, e);
-          charset = null;
+          throw new IllegalArgumentException("charset must have valid charset name");
         }
       } else {
         charset = null;
@@ -111,6 +115,8 @@ public class ModelHttpMediaType {
       throw new NullPointerException();
     if (subtype == null)
       throw new NullPointerException();
+    if (isWildcard(subtype) && !isWildcard(type))
+      throw new IllegalArgumentException("wildcard subtype requires wildcard type");
     this.type = type.toLowerCase();
     this.subtype = subtype.toLowerCase();
     this.charset = charset;
@@ -138,6 +144,9 @@ public class ModelHttpMediaType {
     return new ModelHttpMediaType(getType(), getSubtype(), charset);
   }
 
+  /**
+   * Considers subtype and type only. Parameters are ignored.
+   */
   public boolean isCompatible(ModelHttpMediaType that) {
     if (this.getType().equals(that.getType()) || isWildcard(this.getType())
         || isWildcard(that.getType())) {
@@ -167,6 +176,11 @@ public class ModelHttpMediaType {
         && Objects.equals(type, other.type);
   }
 
+  /**
+   * Returns a valid mime type string for this object
+   * 
+   * @see #fromString(String)
+   */
   @Override
   public String toString() {
     String result = getType() + "/" + getSubtype();

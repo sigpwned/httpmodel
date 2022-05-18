@@ -23,21 +23,88 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
+import com.sigpwned.httpmodel.util.ModelHttpSchemes;
 
+/**
+ * Models a URL
+ */
 public class ModelHttpUrl {
-  public static ModelHttpUrl of(String path, ModelHttpQueryString queryString) {
-    return new ModelHttpUrl(path, queryString);
+  /**
+   * Parses a valid URL
+   * 
+   * @throws IllegalArgumentException if the string is not a valid URL
+   * 
+   * @see #toString()
+   */
+  public static ModelHttpUrl fromString(String s) {
+    try {
+      return fromUrl(new URL(s));
+    } catch (MalformedURLException e) {
+      throw new IllegalArgumentException("must be a valid URL");
+    }
   }
+
+  /**
+   * Converts a URL into an instance of ModelHttpUrl
+   * 
+   * @throws IllegalArgumentException if the query string is not valid
+   *
+   * @see #toUrl()
+   */
+  public static ModelHttpUrl fromUrl(URL url) {
+    String scheme = url.getProtocol();
+    ModelHttpHost host = ModelHttpHost.fromString(url.getHost());
+    Integer port = url.getPort() == -1 ? null : url.getPort();
+    String path = url.getPath().isEmpty() ? "/" : url.getPath();
+    ModelHttpQueryString queryString =
+        Optional.ofNullable(url.getQuery()).map(ModelHttpQueryString::fromString).orElse(null);
+    return of(scheme, ModelHttpAuthority.of(host, port), path, queryString);
+  }
+
+  public static ModelHttpUrl of(String scheme, ModelHttpAuthority authority, String path,
+      ModelHttpQueryString queryString) {
+    return new ModelHttpUrl(scheme, authority, path, queryString);
+  }
+
+  /**
+   * @see ModelHttpSchemes
+   */
+  private final String scheme;
+
+  private final ModelHttpAuthority authority;
 
   private final String path;
 
   private final ModelHttpQueryString queryString;
 
-  public ModelHttpUrl(String path, ModelHttpQueryString queryString) {
+  public ModelHttpUrl(String scheme, ModelHttpAuthority authority, String path,
+      ModelHttpQueryString queryString) {
+    if (scheme == null)
+      throw new NullPointerException();
+    if (authority == null)
+      throw new NullPointerException();
     if (path == null)
       throw new NullPointerException();
+    if (!path.startsWith("/"))
+      throw new IllegalArgumentException("path must be absolute");
+    this.scheme = scheme;
+    this.authority = authority;
     this.path = path;
     this.queryString = queryString;
+  }
+
+  /**
+   * @return the scheme
+   */
+  public String getScheme() {
+    return scheme;
+  }
+
+  /**
+   * @return the authority
+   */
+  public ModelHttpAuthority getAuthority() {
+    return authority;
   }
 
   /**
@@ -56,7 +123,7 @@ public class ModelHttpUrl {
 
   @Override
   public int hashCode() {
-    return Objects.hash(path, queryString);
+    return Objects.hash(authority, path, queryString, scheme);
   }
 
   @Override
@@ -68,20 +135,32 @@ public class ModelHttpUrl {
     if (getClass() != obj.getClass())
       return false;
     ModelHttpUrl other = (ModelHttpUrl) obj;
-    return Objects.equals(path, other.path) && Objects.equals(queryString, other.queryString);
+    return Objects.equals(authority, other.authority) && Objects.equals(path, other.path)
+        && Objects.equals(queryString, other.queryString) && Objects.equals(scheme, other.scheme);
   }
 
   /**
-   * @param baseUrl Base URL for the absolute URL. Should not end with "/".
-   * @throws MalformedURLException If the final URL is not valid
+   * Converts this object into a valid URL
+   * 
+   * @throws IllegalArgumentException if the URL is not valid, which may happen if scheme or path
+   *         are not valid
    */
-  public URL toUrl(String baseUrl) throws MalformedURLException {
-    return new URL(baseUrl + toString());
+  public URL toUrl() {
+    try {
+      return new URL(toString());
+    } catch (MalformedURLException e) {
+      throw new IllegalArgumentException("not a valid URL");
+    }
   }
 
+  /**
+   * Converts this object into a valid URL string
+   * 
+   * @see #fromString(String)
+   */
   @Override
   public String toString() {
-    String result = getPath();
+    String result = getScheme() + "://" + getAuthority() + getPath();
     if (getQueryString().isPresent()) {
       result = result + "?" + getQueryString().get().toString();
     }

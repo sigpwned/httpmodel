@@ -19,25 +19,47 @@
  */
 package com.sigpwned.httpmodel;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import com.sigpwned.httpmodel.util.ModelHttpEncodings;
 
+/**
+ * Models an HTTP query string, e.g., alpha=bravo&charlie=delta
+ */
 public class ModelHttpQueryString {
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
   private static final Pattern EQUALS = Pattern.compile("=");
 
+  /**
+   * Models a single query parameter, e.g., alpha=bravo
+   */
   public static class Parameter {
+
+    /**
+     * Parses a valid query parameter. The name and value are automatically urldecoded. If the query
+     * parameter does not contain "=", then the value is considered absent.
+     * 
+     * @throws IllegalArgumentException if the query string is not valid
+     * 
+     * @see ModelHttpEncodings#urldecode(String)
+     * @see #toString()
+     */
     public static Parameter fromString(String nv) {
       String[] parts = EQUALS.split(nv, 2);
       String n = ModelHttpEncodings.urldecode(parts[0]);
       String v = parts.length == 2 ? ModelHttpEncodings.urldecode(parts[1]) : "";
       return Parameter.of(n, v);
+    }
+
+    public static Parameter of(String name, Optional<String> value) {
+      return of(name, value.orElse(null));
     }
 
     public static Parameter of(String name, String value) {
@@ -49,8 +71,6 @@ public class ModelHttpQueryString {
 
     public Parameter(String name, String value) {
       if (name == null)
-        throw new NullPointerException();
-      if (value == null)
         throw new NullPointerException();
       this.name = name;
       this.value = value;
@@ -66,8 +86,8 @@ public class ModelHttpQueryString {
     /**
      * @return the value
      */
-    public String getValue() {
-      return value;
+    public Optional<String> getValue() {
+      return Optional.ofNullable(value);
     }
 
     @Override
@@ -87,22 +107,41 @@ public class ModelHttpQueryString {
       return Objects.equals(name, other.name) && Objects.equals(value, other.value);
     }
 
+    /**
+     * Converts this object into a valid query parameter string. The name and value are
+     * automatically urlencoded.
+     * 
+     * @see ModelHttpEncodings#urlencode(String)
+     * @see #fromString(String)
+     */
     @Override
     public String toString() {
       String result = ModelHttpEncodings.urlencode(getName());
-      if (getValue() != null)
-        result = result + "=" + ModelHttpEncodings.urlencode(getValue());
+      if (getValue().isPresent())
+        result = result + "=" + ModelHttpEncodings.urlencode(getValue().get());
       return result;
     }
   }
 
+  /**
+   * Parses a valid query string.
+   * 
+   * @throws IllegalArgumentException if the query string is not valid
+   *
+   * @see Parameter#fromString(String)
+   * @see #toString()
+   */
   public static ModelHttpQueryString fromString(String s) {
     return ModelHttpQueryString.of(AMPERSAND.splitAsStream(s).filter(nv -> !nv.isEmpty())
         .map(Parameter::fromString).collect(toList()));
   }
 
-  public static ModelHttpQueryString of(List<Parameter> entries) {
-    return new ModelHttpQueryString(entries);
+  public static ModelHttpQueryString of(Parameter... parameters) {
+    return new ModelHttpQueryString(asList(parameters));
+  }
+
+  public static ModelHttpQueryString of(List<Parameter> parameters) {
+    return new ModelHttpQueryString(parameters);
   }
 
   private final List<Parameter> parameters;
@@ -118,6 +157,14 @@ public class ModelHttpQueryString {
    */
   public List<Parameter> getParameters() {
     return parameters;
+  }
+
+  public Optional<Parameter> findFirstParameterByName(String name) {
+    return getParameters().stream().filter(p -> p.getName().equals(name)).findFirst();
+  }
+
+  public List<Parameter> findAllParametersByName(String name) {
+    return getParameters().stream().filter(p -> p.getName().equals(name)).collect(toList());
   }
 
   @Override
@@ -137,6 +184,11 @@ public class ModelHttpQueryString {
     return Objects.equals(parameters, other.parameters);
   }
 
+  /**
+   * Converts this object to a valid query string
+   * 
+   * @see #fromString(String)
+   */
   @Override
   public String toString() {
     return getParameters().stream().map(Parameter::toString).collect(joining("&"));

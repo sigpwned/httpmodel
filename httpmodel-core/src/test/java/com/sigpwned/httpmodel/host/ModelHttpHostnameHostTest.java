@@ -17,17 +17,21 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.util;
+package com.sigpwned.httpmodel.host;
 
-/**
- * Constants for HTTP protocol versions
- */
-public final class ModelHttpVersions {
-  private ModelHttpVersions() {}
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.Test;
 
-  public static final String HTTP_1_0 = "HTTP/1.0";
+public class ModelHttpHostnameHostTest {
+  @Test
+  public void shouldAcceptValidHostname() {
+    assertThat(ModelHttpHostnameHost.fromString("example.com"),
+        is(ModelHttpHostnameHost.of("example.com")));
+  }
 
-  public static final String HTTP_1_1 = "HTTP/1.1";
-
-  public static final String HTTP_2 = "HTTP/2";
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldNotAcceptInvalidHostname() {
+    ModelHttpHostnameHost.fromString("!&*#@$*");
+  }
 }

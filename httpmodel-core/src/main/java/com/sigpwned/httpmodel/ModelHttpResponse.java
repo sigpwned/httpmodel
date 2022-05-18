@@ -25,10 +25,22 @@ import java.util.Objects;
 import java.util.Optional;
 import com.sigpwned.httpmodel.util.ModelHttpStatusCodes;
 
+/**
+ * Models an HTTP response
+ */
 public class ModelHttpResponse {
+  public static ModelHttpResponse of(int statusCode, ModelHttpEntity entity) {
+    return of(statusCode, List.of(), entity);
+  }
+
   public static ModelHttpResponse of(int statusCode, List<ModelHttpHeader> headers,
       ModelHttpEntity entity) {
     return new ModelHttpResponse(statusCode, headers, entity);
+  }
+
+  public static ModelHttpResponse of(int statusCode, List<ModelHttpHeader> headers,
+      Optional<ModelHttpEntity> entity) {
+    return new ModelHttpResponse(statusCode, headers, entity.orElse(null));
   }
 
   /**

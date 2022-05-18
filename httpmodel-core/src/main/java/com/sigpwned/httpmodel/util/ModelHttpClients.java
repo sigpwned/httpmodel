@@ -19,13 +19,12 @@
  */
 package com.sigpwned.httpmodel.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,15 +36,14 @@ import com.sigpwned.httpmodel.ModelHttpRequest;
 import com.sigpwned.httpmodel.ModelHttpResponse;
 
 /**
- * Converts model objects to and from the Java 11 built-in HTTP client implementation.
+ * Converts model objects to and from the Java 11 built-in HTTP client implementation. This is for
+ * the client side.
  */
-public final class HttpURLConnections {
-  private HttpURLConnections() {}
+public final class ModelHttpClients {
+  private ModelHttpClients() {}
 
   /**
-   * Converts and sends the given request using the built-in {@link URLConnection} classes. Note
-   * that this method may send the given request, which is unavoidable because a request body is
-   * potentially included.
+   * Converts the given request into an {@link HttpRequest} object. Does not send the request.
    * 
    * @param baseUrl The base URL to send the request to. The request only contains path and query
    *        string information, so a base URL is required. Example: https://en.wikipedia.org
@@ -53,47 +51,39 @@ public final class HttpURLConnections {
    * @return
    * @throws MalformedURLException
    */
-  public static HttpURLConnection fromRequest(String baseUrl, ModelHttpRequest request)
-      throws IOException {
-    URL url = request.getUrl().toUrl(baseUrl);
+  public static HttpRequest fromRequest(ModelHttpRequest request) throws MalformedURLException {
+    URI uri;
+    try {
+      uri = request.getUrl().toUrl().toURI();
+    } catch (URISyntaxException e) {
+      throw new MalformedURLException("Cannot convert URL to URI");
+    }
 
-    HttpURLConnection result = (HttpURLConnection) url.openConnection();
-
-    result.setRequestMethod(request.getMethod());
+    HttpRequest.Builder result = HttpRequest.newBuilder().uri(uri);
 
     for (ModelHttpHeader header : request.getHeaders())
-      result.setRequestProperty(header.getName(), header.getValue());
+      result.header(header.getName(), header.getValue());
 
     if (request.getEntity().isPresent()) {
       ModelHttpEntity entity = request.getEntity().get();
-
-      result.setRequestProperty(ModelHttpHeaderNames.CONTENT_TYPE, entity.getType().toString());
-
-      result.setDoOutput(true);
-
-      try (OutputStream out = result.getOutputStream()) {
-        try (InputStream in = entity.readBytes()) {
-          MoreByteStreams.drain(in, out);
-        }
-      }
+      result.method(request.getMethod(), BodyPublishers.ofByteArray(entity.toByteArray()));
+      if (entity.getType().isPresent())
+        result.setHeader(ModelHttpHeaderNames.CONTENT_TYPE, entity.getType().toString());
     } else {
-      result.setDoOutput(false);
+      result.method(request.getMethod(), BodyPublishers.noBody());
     }
 
-    return result;
+    return result.build();
   }
 
   /**
-   * Converts a {@link HttpURLConnection} to a {@link ModelHttpResponse}. Note that this method will
-   * make an HTTP request with the connection if the request has not already been made.
-   * 
-   * @throws IOException
+   * Converts an {@link HttpResponse} to a {@link ModelHttpResponse}.
    */
-  public static ModelHttpResponse toResponse(HttpURLConnection cn) throws IOException {
-    int statusCode = cn.getResponseCode();
+  public static ModelHttpResponse toResponse(HttpResponse<byte[]> response) {
+    int statusCode = response.statusCode();
 
     List<ModelHttpHeader> headers = new ArrayList<>();
-    for (Map.Entry<String, List<String>> e : cn.getHeaderFields().entrySet()) {
+    for (Map.Entry<String, List<String>> e : response.headers().map().entrySet()) {
       String headerName = e.getKey();
       List<String> headerValues = e.getValue();
       for (String headerValue : headerValues) {
@@ -117,13 +107,7 @@ public final class HttpURLConnections {
       ModelHttpMediaType contentType = Optional.ofNullable(contentTypeHeader)
           .map(ModelHttpHeader::getValue).map(ModelHttpMediaType::fromString)
           .orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM);
-
-      byte[] data;
-      try (InputStream in = cn.getInputStream()) {
-        data = MoreByteStreams.toByteArray(in);
-      }
-
-      entity = ModelHttpEntity.of(contentType, data);
+      entity = ModelHttpEntity.of(contentType, response.body());
     } else {
       entity = null;
     }

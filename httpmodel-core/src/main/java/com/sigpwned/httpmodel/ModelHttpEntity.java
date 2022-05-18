@@ -26,13 +26,29 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import com.sigpwned.httpmodel.util.ModelHttpMediaTypes;
 import com.sigpwned.httpmodel.util.MoreByteStreams;
 import com.sigpwned.httpmodel.util.MoreCharStreams;
 
+/**
+ * Models an HTTP entity, which is a byte stream and content type.
+ * 
+ * Note that this class buffers the entire entity in memory. As a result, it's important only to use
+ * this class for modeling HTTP flows when the approximate size of the response is known.
+ */
 public class ModelHttpEntity {
+  public static ModelHttpEntity ofPlainText(String text) {
+    return of(ModelHttpMediaTypes.TEXT_PLAIN, text);
+  }
+
+  public static ModelHttpEntity of(ModelHttpMediaType type, String data) {
+    return new ModelHttpEntity(type, data);
+  }
+
   public static ModelHttpEntity of(ModelHttpMediaType type, byte[] data) {
     return new ModelHttpEntity(type, data);
   }
@@ -40,6 +56,10 @@ public class ModelHttpEntity {
   private final ModelHttpMediaType type;
 
   private final byte[] data;
+
+  public ModelHttpEntity(ModelHttpMediaType type, String data) {
+    this(type.withCharset(StandardCharsets.UTF_8), data.getBytes(StandardCharsets.UTF_8));
+  }
 
   public ModelHttpEntity(ModelHttpMediaType type, byte[] data) {
     if (data == null)

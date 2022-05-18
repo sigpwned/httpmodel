@@ -26,6 +26,12 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+/**
+ * Helper methods for dealing with character streams.
+ * 
+ * @see Reader
+ * @see Writer
+ */
 public final class MoreCharStreams {
   private MoreCharStreams() {}
 

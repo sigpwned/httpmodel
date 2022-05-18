@@ -19,22 +19,40 @@
  */
 package com.sigpwned.httpmodel.entity;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import com.sigpwned.httpmodel.ModelHttpEntity;
 import com.sigpwned.httpmodel.util.ModelHttpEncodings;
+import com.sigpwned.httpmodel.util.ModelHttpMediaTypes;
 
+/**
+ * Models an HTTP entity of type application/x-www-form-urlencoded.
+ */
 public class ModelHttpFormData {
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
   private static final Pattern EQUALS = Pattern.compile("=");
 
+  /**
+   * Models a single form entry, e.g., alpha=bravo
+   */
   public static class Entry {
+    /**
+     * Parses a valid form entry. The name and value are automatically urldecoded. If the form entry
+     * does not contain "=", then the value is considered absent.
+     * 
+     * @throws IllegalArgumentException if the form entry is not valid
+     * 
+     * @see ModelHttpEncodings#urldecode(String)
+     * @see #toString()
+     */
     public static Entry fromString(String nv) {
       String[] parts = EQUALS.split(nv, 2);
       String n = ModelHttpEncodings.urldecode(parts[0]);
@@ -89,6 +107,13 @@ public class ModelHttpFormData {
       return Objects.equals(name, other.name) && Objects.equals(value, other.value);
     }
 
+    /**
+     * Converts this object into a valid form entry string. The name and value are automatically
+     * urlencoded.
+     * 
+     * @see ModelHttpEncodings#urlencode(String)
+     * @see #fromString(String)
+     */
     @Override
     public String toString() {
       return new StringBuilder().append(ModelHttpEncodings.urlencode(getName())).append("=")
@@ -96,13 +121,30 @@ public class ModelHttpFormData {
     }
   }
 
+  /**
+   * Convenience method that converts the given entity to a string and then parses
+   * 
+   * @see #fromString(String)
+   */
   public static ModelHttpFormData fromEntity(ModelHttpEntity entity) {
     return fromString(entity.toString(StandardCharsets.UTF_8));
   }
 
+  /**
+   * Parses a valid form string, e.g., alpha=bravo&charlie=delta
+   * 
+   * @throws IllegalArgumentException if the form string is not valid
+   *
+   * @see Entry#fromString(String)
+   * @see #toString()
+   */
   public static ModelHttpFormData fromString(String s) {
     return ModelHttpFormData.of(AMPERSAND.splitAsStream(s).filter(nv -> !nv.isEmpty())
         .map(Entry::fromString).collect(toList()));
+  }
+
+  public static ModelHttpFormData of(Entry... entries) {
+    return new ModelHttpFormData(asList(entries));
   }
 
   public static ModelHttpFormData of(List<Entry> entries) {
@@ -124,6 +166,16 @@ public class ModelHttpFormData {
     return entries;
   }
 
+  public Optional<String> findFirstEntryByName(String name) {
+    return getEntries().stream().filter(e -> e.getName().equals(name)).map(Entry::getValue)
+        .findFirst();
+  }
+
+  public List<String> findAllEntriesByName(String name) {
+    return getEntries().stream().filter(e -> e.getName().equals(name)).map(Entry::getValue)
+        .collect(toList());
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(entries);
@@ -141,6 +193,15 @@ public class ModelHttpFormData {
     return Objects.equals(entries, other.entries);
   }
 
+  public ModelHttpEntity toEntity() {
+    return ModelHttpEntity.of(ModelHttpMediaTypes.APPLICATION_X_WWW_FORM_URLENCODED, toString());
+  }
+
+  /**
+   * Converts this object to a valid form string
+   * 
+   * @see #fromString(String)
+   */
   @Override
   public String toString() {
     return getEntries().stream().map(Entry::toString).collect(joining("&"));
