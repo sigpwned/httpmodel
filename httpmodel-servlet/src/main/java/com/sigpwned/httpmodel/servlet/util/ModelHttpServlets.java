@@ -126,7 +126,10 @@ public final class ModelHttpServlets {
     if (response.getEntity().isPresent()) {
       ModelHttpEntity entity = response.getEntity().get();
 
-      result.setHeader(ModelHttpHeaderNames.CONTENT_TYPE, entity.getType().toString());
+      result.setContentType(
+          entity.getType().orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM).toString());
+
+      result.setContentLength(entity.length());
 
       try (OutputStream out = result.getOutputStream()) {
         try (InputStream in = entity.readBytes()) {

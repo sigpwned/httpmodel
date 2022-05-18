@@ -115,8 +115,8 @@ public class ModelHttpMediaType {
       throw new NullPointerException();
     if (subtype == null)
       throw new NullPointerException();
-    if (isWildcard(subtype) && !isWildcard(type))
-      throw new IllegalArgumentException("wildcard subtype requires wildcard type");
+    if (isWildcard(type) && !isWildcard(subtype))
+      throw new IllegalArgumentException("wildcard type requires wildcard subtype");
     this.type = type.toLowerCase();
     this.subtype = subtype.toLowerCase();
     this.charset = charset;
