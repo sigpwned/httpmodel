@@ -1,4 +1,4 @@
-# HTTPMODEL
+# HTTPMODEL [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sigpwned/litecene-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sigpwned/httpmodel-core)
 
 ## Motivation
 
