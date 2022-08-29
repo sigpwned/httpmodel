@@ -201,6 +201,7 @@
     <modules>
         <module>httpmodel-core</module>
         <module>httpmodel-servlet</module>
+        <module>httpmodel-jakarta-servlet</module>
     </modules>
 
     <!-- For releasing to maven central -->

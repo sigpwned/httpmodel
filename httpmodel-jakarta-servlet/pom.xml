@@ -7,9 +7,9 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>httpmodel-servlet</artifactId>
-    <name>httpmodel-servlet</name>
-    <description>Utility functions for javax.servlet package</description>
+    <artifactId>httpmodel-jakarta-servlet</artifactId>
+    <name>httpmodel-jakarta-servlet</name>
+    <description>Utility functions for jakarta.servlet package</description>
 
     <dependencies>
         <dependency>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>4.0.4</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.sigpwned</groupId>
