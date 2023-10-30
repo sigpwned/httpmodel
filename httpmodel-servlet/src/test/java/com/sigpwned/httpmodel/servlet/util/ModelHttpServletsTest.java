@@ -34,14 +34,14 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
-import com.sigpwned.httpmodel.ModelHttpEntity;
-import com.sigpwned.httpmodel.ModelHttpRequest;
-import com.sigpwned.httpmodel.ModelHttpResponse;
-import com.sigpwned.httpmodel.ModelHttpUrl;
-import com.sigpwned.httpmodel.util.ModelHttpMediaTypes;
-import com.sigpwned.httpmodel.util.ModelHttpMethods;
-import com.sigpwned.httpmodel.util.ModelHttpStatusCodes;
-import com.sigpwned.httpmodel.util.ModelHttpVersions;
+import com.sigpwned.httpmodel.core.ModelHttpEntity;
+import com.sigpwned.httpmodel.core.ModelHttpRequest;
+import com.sigpwned.httpmodel.core.ModelHttpResponse;
+import com.sigpwned.httpmodel.core.ModelHttpUrl;
+import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
+import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
+import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
+import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
 public class ModelHttpServletsTest {
   @Test

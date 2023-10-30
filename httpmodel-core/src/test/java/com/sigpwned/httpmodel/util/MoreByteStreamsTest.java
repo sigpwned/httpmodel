@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.junit.Test;
+import com.sigpwned.httpmodel.core.util.MoreByteStreams;
 
 public class MoreByteStreamsTest {
   @Test

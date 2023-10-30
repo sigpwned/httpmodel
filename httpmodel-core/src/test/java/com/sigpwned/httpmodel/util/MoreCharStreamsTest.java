@@ -24,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.IOException;
 import java.io.StringReader;
 import org.junit.Test;
+import com.sigpwned.httpmodel.core.util.MoreCharStreams;
 
 public class MoreCharStreamsTest {
   @Test

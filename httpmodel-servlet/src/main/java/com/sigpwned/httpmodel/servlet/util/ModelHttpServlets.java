@@ -28,18 +28,18 @@ import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.sigpwned.httpmodel.ModelHttpAuthority;
-import com.sigpwned.httpmodel.ModelHttpEntity;
-import com.sigpwned.httpmodel.ModelHttpHeaders;
-import com.sigpwned.httpmodel.ModelHttpHost;
-import com.sigpwned.httpmodel.ModelHttpMediaType;
-import com.sigpwned.httpmodel.ModelHttpQueryString;
-import com.sigpwned.httpmodel.ModelHttpRequest;
-import com.sigpwned.httpmodel.ModelHttpResponse;
-import com.sigpwned.httpmodel.ModelHttpUrl;
-import com.sigpwned.httpmodel.util.ModelHttpHeaderNames;
-import com.sigpwned.httpmodel.util.ModelHttpMediaTypes;
-import com.sigpwned.httpmodel.util.MoreByteStreams;
+import com.sigpwned.httpmodel.core.ModelHttpAuthority;
+import com.sigpwned.httpmodel.core.ModelHttpEntity;
+import com.sigpwned.httpmodel.core.ModelHttpHeaders;
+import com.sigpwned.httpmodel.core.ModelHttpHost;
+import com.sigpwned.httpmodel.core.ModelHttpMediaType;
+import com.sigpwned.httpmodel.core.ModelHttpQueryString;
+import com.sigpwned.httpmodel.core.ModelHttpRequest;
+import com.sigpwned.httpmodel.core.ModelHttpResponse;
+import com.sigpwned.httpmodel.core.ModelHttpUrl;
+import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
+import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
+import com.sigpwned.httpmodel.core.util.MoreByteStreams;
 
 /**
  * This is server side.

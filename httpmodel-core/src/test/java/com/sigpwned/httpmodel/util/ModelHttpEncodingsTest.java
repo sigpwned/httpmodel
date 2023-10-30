@@ -22,6 +22,7 @@ package com.sigpwned.httpmodel.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Test;
+import com.sigpwned.httpmodel.core.util.ModelHttpEncodings;
 
 public class ModelHttpEncodingsTest {
   @Test

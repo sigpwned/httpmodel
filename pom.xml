@@ -55,7 +55,7 @@
     </issueManagement>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <sonar.organization>sigpwned</sonar.organization>
@@ -76,7 +76,6 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <release>${java.version}</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -200,6 +199,7 @@
 
     <modules>
         <module>httpmodel-core</module>
+        <module>httpmodel-java11-client</module>
         <module>httpmodel-servlet</module>
         <module>httpmodel-jakarta-servlet</module>
     </modules>

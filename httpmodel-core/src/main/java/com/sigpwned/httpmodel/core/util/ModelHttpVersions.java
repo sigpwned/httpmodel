@@ -17,26 +17,17 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.entity;
+package com.sigpwned.httpmodel.core.util;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import org.junit.Test;
-import com.sigpwned.httpmodel.core.entity.ModelHttpFormData;
+/**
+ * Constants for HTTP protocol versions
+ */
+public final class ModelHttpVersions {
+  private ModelHttpVersions() {}
 
-public class ModelHttpFormDataTest {
-  @Test
-  public void shouldConvertFromStringProperly() {
-    ModelHttpFormData entity = ModelHttpFormData.fromString("alpha=bravo%21&charlie=delta%20echo");
-    assertThat(entity, is(ModelHttpFormData.of(asList(ModelHttpFormData.Entry.of("alpha", "bravo!"),
-        ModelHttpFormData.Entry.of("charlie", "delta echo")))));
-  }
+  public static final String HTTP_1_0 = "HTTP/1.0";
 
-  @Test
-  public void shouldConvertToStringProperly() {
-    String string = ModelHttpFormData.of(asList(ModelHttpFormData.Entry.of("alpha", "bravo!"),
-        ModelHttpFormData.Entry.of("charlie", "delta echo"))).toString();
-    assertThat(string, is("alpha=bravo%21&charlie=delta%20echo"));
-  }
+  public static final String HTTP_1_1 = "HTTP/1.1";
+
+  public static final String HTTP_2 = "HTTP/2";
 }

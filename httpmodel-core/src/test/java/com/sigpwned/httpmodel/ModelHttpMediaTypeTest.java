@@ -23,6 +23,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import java.nio.charset.StandardCharsets;
 import org.junit.Test;
+import com.sigpwned.httpmodel.core.ModelHttpMediaType;
 
 public class ModelHttpMediaTypeTest {
   @Test

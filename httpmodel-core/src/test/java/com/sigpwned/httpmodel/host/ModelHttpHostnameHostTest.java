@@ -22,6 +22,7 @@ package com.sigpwned.httpmodel.host;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Test;
+import com.sigpwned.httpmodel.core.host.ModelHttpHostnameHost;
 
 public class ModelHttpHostnameHostTest {
   @Test
