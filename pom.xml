@@ -3,7 +3,7 @@
 
     <groupId>com.sigpwned</groupId>
     <artifactId>httpmodel</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>httpmodel</name>
     <inceptionYear>2022</inceptionYear>
     <description>A library-agnostic HTTP model library for library-agnostic HTTP operations</description>
@@ -19,7 +19,7 @@
         <connection>scm:git:ssh://git@github.com/sigpwned/httpmodel.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/sigpwned/httpmodel.git</developerConnection>
         <url>https://github.com/sigpwned/httpmodel/tree/main</url>
-        <tag>HEAD</tag>
+        <tag>v1.0.0</tag>
     </scm>
 
     <licenses>
