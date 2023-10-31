@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -105,14 +105,11 @@ public class SigV4AwsSigner implements AwsSigner {
   @Override
   public ModelHttpRequest sign(ModelHttpRequest request, String region, String service,
       OffsetDateTime now) {
-    String authorizationHeaderValue =
-        computeAuthorizationHeaderValue(request, region, service, now);
-    return request.withHeaders(request.getHeaders().toBuilder()
-        .setAllHeaders(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue).build());
+    return computeAuthorizationHeaderValue(request, region, service, now);
   }
 
-  /* default */ String computeAuthorizationHeaderValue(ModelHttpRequest request, String region,
-      String service, OffsetDateTime now) {
+  /* default */ ModelHttpRequest computeAuthorizationHeaderValue(ModelHttpRequest request,
+      String region, String service, OffsetDateTime now) {
     AwsSigningCredentials credentials = getCredentialsProvider().getCredentials();
     this.accessKeyId = credentials.getAccessKeyId();
     this.secretAccessKey = credentials.getSecretAccessKey();
@@ -125,13 +122,6 @@ public class SigV4AwsSigner implements AwsSigner {
     final String httpMethod = request.getMethod().toUpperCase();
     final String canonicalUri = request.getUrl().getPath();
 
-    final Map<String, String> canonicalHeaders = extractCanonicalHeaders(request);
-    final String canonicalHeaderString = canonicalHeaders.entrySet().stream()
-        .map(h -> h.getKey() + ":" + h.getValue() + "\n").collect(joining(""));
-    final String signedHeaders = canonicalHeaders.keySet().stream().collect(joining(";"));
-
-    final String canonicalParameterString = extractCanonicalParameterString(request);
-
     final String hashedPayload;
     if (request.getEntity().isPresent()) {
       try (InputStream entityStream = request.getEntity().get().readBytes()) {
@@ -142,6 +132,37 @@ public class SigV4AwsSigner implements AwsSigner {
     } else {
       hashedPayload = EMPTY_HASHED_PAYLOAD;
     }
+
+    final String hostname = request.getHeaders().findFirstHeaderByName(HOST_HEADER_NAME)
+        .map(ModelHttpHeaders.Header::getValue)
+        .orElseGet(() -> request.getUrl().getAuthority().getHost().toString());
+
+    final String contentType = request.getHeaders().findFirstHeaderByName(CONTENT_TYPE_HEADER_NAME)
+        .map(ModelHttpHeaders.Header::getValue).orElse(null);
+
+    final Map<String, String> rawHeaders = new HashMap<>();
+    rawHeaders.put(HOST_HEADER_NAME, hostname);
+    if (contentType != null)
+      rawHeaders.put(CONTENT_TYPE_HEADER_NAME, contentType);
+    request.getHeaders().stream().filter(h -> h.getName().startsWith("x-amz-")).forEach(h -> {
+      rawHeaders.put(h.getName(), h.getValue());
+    });
+    if (!rawHeaders.containsKey(X_AMZ_CONTENT_SHA256_HEADER_NAME))
+      rawHeaders.put(X_AMZ_CONTENT_SHA256_HEADER_NAME, hashedPayload);
+    if (!rawHeaders.containsKey(X_AMZ_DATE_HEADER_NAME))
+      rawHeaders.put(X_AMZ_DATE_HEADER_NAME, timestampString);
+    if (!rawHeaders.containsKey(X_AMZ_SECURITY_TOKEN) && sessionToken != null)
+      rawHeaders.put(X_AMZ_SECURITY_TOKEN, sessionToken);
+
+    final Map<String, String> canonicalHeaders =
+        rawHeaders.entrySet().stream().map(SigV4AwsSigner::canonicalizeHeader)
+            .sorted(HEADER_COMPARATOR).collect(toMap(Map.Entry::getKey, Map.Entry::getValue,
+                SigV4AwsSigner::failMergeFunction, LinkedHashMap::new));
+    final String canonicalHeaderString = canonicalHeaders.entrySet().stream()
+        .map(h -> h.getKey() + ":" + h.getValue() + "\n").collect(joining(""));
+    final String signedHeaders = canonicalHeaders.keySet().stream().collect(joining(";"));
+
+    final String canonicalParameterString = extractCanonicalParameterString(request);
 
     final String canonicalRequestString = String.join("\n", httpMethod, canonicalUri,
         canonicalParameterString, canonicalHeaderString, signedHeaders, hashedPayload);
@@ -160,9 +181,19 @@ public class SigV4AwsSigner implements AwsSigner {
 
     // AWS4-HMAC-SHA256
     // Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41
-    return new StringBuilder().append(AWS4_HMAC_SHA256).append(" ").append("Credential=")
-        .append(accessKeyId).append("/").append(scope).append(",").append("SignedHeaders=")
-        .append(signedHeaders).append(",").append("Signature=").append(signature).toString();
+    String authorization =
+        new StringBuilder().append(AWS4_HMAC_SHA256).append(" ").append("Credential=")
+            .append(accessKeyId).append("/").append(scope).append(",").append("SignedHeaders=")
+            .append(signedHeaders).append(",").append("Signature=").append(signature).toString();
+
+    return request
+        .withHeaders(request.getHeaders().toBuilder().setOnlyHeader(HOST_HEADER_NAME, hostname)
+            .setOnlyHeader(CONTENT_TYPE_HEADER_NAME, contentType)
+            .setOnlyHeader(X_AMZ_CONTENT_SHA256_HEADER_NAME,
+                rawHeaders.get(X_AMZ_CONTENT_SHA256_HEADER_NAME))
+            .setOnlyHeader(X_AMZ_DATE_HEADER_NAME, rawHeaders.get(X_AMZ_DATE_HEADER_NAME))
+            .setOnlyHeader(X_AMZ_SECURITY_TOKEN, rawHeaders.get(X_AMZ_SECURITY_TOKEN))
+            .setOnlyHeader(AUTHORIZATION_HEADER_NAME, authorization).build());
   }
 
   private AwsSigningCredentialsProvider getCredentialsProvider() {
@@ -188,30 +219,6 @@ public class SigV4AwsSigner implements AwsSigner {
   }
 
   // HEADERS //////////////////////////////////////////////////////////////////
-  private Map<String, String> extractCanonicalHeaders(ModelHttpRequest request) {
-    final Map<String, String> rawHeaders = new HashMap<>();
-    rawHeaders.put(HOST_HEADER_NAME,
-        request.getHeaders().findFirstHeaderByName(HOST_HEADER_NAME)
-            .map(ModelHttpHeaders.Header::getValue)
-            .orElseGet(() -> request.getUrl().getAuthority().getHost().toString()));
-    request.getHeaders().findFirstHeaderByName(CONTENT_TYPE_HEADER_NAME)
-        .map(ModelHttpHeaders.Header::getValue).ifPresent(contentType -> {
-          rawHeaders.put(CONTENT_TYPE_HEADER_NAME, contentType);
-        });
-    request.getHeaders().stream().filter(h -> h.getName().startsWith("x-amz-")).forEach(h -> {
-      rawHeaders.put(h.getName(), h.getValue());
-    });
-    if (!rawHeaders.containsKey(X_AMZ_CONTENT_SHA256_HEADER_NAME))
-      rawHeaders.put(X_AMZ_CONTENT_SHA256_HEADER_NAME, EMPTY_HASHED_PAYLOAD);
-    if (!rawHeaders.containsKey(X_AMZ_DATE_HEADER_NAME))
-      rawHeaders.put(X_AMZ_DATE_HEADER_NAME, timestampString);
-    if (!rawHeaders.containsKey(X_AMZ_SECURITY_TOKEN) && sessionToken != null)
-      rawHeaders.put(X_AMZ_SECURITY_TOKEN, sessionToken);
-    return rawHeaders.entrySet().stream().map(SigV4AwsSigner::canonicalizeHeader)
-        .sorted(HEADER_COMPARATOR).collect(toMap(Map.Entry::getKey, Map.Entry::getValue,
-            SigV4AwsSigner::failMergeFunction, LinkedHashMap::new));
-  }
-
   private static final Comparator<Map.Entry<String, String>> HEADER_COMPARATOR =
       Comparator.comparing(p -> p.getKey());
 

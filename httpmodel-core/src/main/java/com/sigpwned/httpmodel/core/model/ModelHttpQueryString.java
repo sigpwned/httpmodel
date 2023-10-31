@@ -178,6 +178,10 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
     return stream().filter(p -> p.getName().equals(name)).collect(toList());
   }
 
+  public ModelHttpQueryStringBuilder toBuilder() {
+    return new ModelHttpQueryStringBuilder(this);
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(parameters);

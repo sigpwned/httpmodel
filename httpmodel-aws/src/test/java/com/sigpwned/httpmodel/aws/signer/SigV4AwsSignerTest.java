@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import java.time.ZoneOffset;
 import org.junit.Test;
 import com.sigpwned.httpmodel.aws.AwsSigningCredentials;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
+import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpUrl;
 
@@ -60,7 +61,11 @@ public class SigV4AwsSignerTest {
     final OffsetDateTime now =
         OffsetDateTime.of(LocalDate.of(2013, 5, 24), LocalTime.MIDNIGHT, ZoneOffset.UTC);
 
-    String authorization = signer.computeAuthorizationHeaderValue(request, US_EAST_1, S3, now);
+    ModelHttpRequest authorizedRequest =
+        signer.computeAuthorizationHeaderValue(request, US_EAST_1, S3, now);
+
+    String authorization = authorizedRequest.getHeaders().findFirstHeaderByName("authorization")
+        .map(Header::getValue).get();
 
     assertThat(authorization, is(
         "AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670ed5711ef69dc6f7"));
