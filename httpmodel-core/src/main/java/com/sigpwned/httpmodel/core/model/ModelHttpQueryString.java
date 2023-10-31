@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.core.model;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -29,13 +29,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import com.sigpwned.httpmodel.core.ModelHttpQueryString.Parameter;
+import com.sigpwned.httpmodel.core.model.ModelHttpQueryString.Parameter;
 import com.sigpwned.httpmodel.core.util.ModelHttpEncodings;
 
 /**
  * Models an HTTP query string, e.g., alpha=bravo&amp;charlie=delta
  */
 public class ModelHttpQueryString implements Iterable<Parameter> {
+  public static ModelHttpQueryStringBuilder builder() {
+    return new ModelHttpQueryStringBuilder();
+  }
+
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
   private static final Pattern EQUALS = Pattern.compile("=");
@@ -48,9 +52,9 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
     /**
      * Parses a valid query parameter. The name and value are automatically urldecoded. If the query
      * parameter does not contain "=", then the value is considered absent.
-     * 
+     *
      * @throws IllegalArgumentException if the query string is not valid
-     * 
+     *
      * @see ModelHttpEncodings#urldecode(String)
      * @see #toString()
      */
@@ -113,7 +117,7 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
     /**
      * Converts this object into a valid query parameter string. The name and value are
      * automatically urlencoded.
-     * 
+     *
      * @see ModelHttpEncodings#urlencode(String)
      * @see #fromString(String)
      */
@@ -128,7 +132,7 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
 
   /**
    * Parses a valid query string.
-   * 
+   *
    * @throws IllegalArgumentException if the query string is not valid
    *
    * @see Parameter#fromString(String)
@@ -149,10 +153,14 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
 
   private final List<Parameter> parameters;
 
-  public ModelHttpQueryString(List<Parameter> entries) {
-    if (entries == null)
+  public ModelHttpQueryString(List<Parameter> parameters) {
+    if (parameters == null)
       throw new NullPointerException();
-    this.parameters = unmodifiableList(entries);
+    this.parameters = unmodifiableList(parameters);
+  }
+
+  /* default */ ModelHttpQueryString(ModelHttpQueryStringBuilder that) {
+    this(that.parameters());
   }
 
   /**
@@ -189,7 +197,7 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
 
   /**
    * Converts this object to a valid query string
-   * 
+   *
    * @see #fromString(String)
    */
   @Override

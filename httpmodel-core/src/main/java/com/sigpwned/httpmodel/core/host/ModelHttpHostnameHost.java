@@ -21,7 +21,7 @@ package com.sigpwned.httpmodel.core.host;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
-import com.sigpwned.httpmodel.core.ModelHttpHost;
+import com.sigpwned.httpmodel.core.model.ModelHttpHost;
 
 /**
  * Models an HTTP hostname. Only validates for form. In particular, does no DNS requests to

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.core.model;
 
 import java.util.Objects;
 import java.util.OptionalInt;
@@ -27,14 +27,18 @@ import java.util.regex.Pattern;
  * Models a URL authority, which is the host and (optional) port.
  */
 public class ModelHttpAuthority {
+  public static ModelHttpAuthorityBuilder builder() {
+    return new ModelHttpAuthorityBuilder();
+  }
+
   private static final Pattern COLON = Pattern.compile(":");
 
   /**
    * Parses a valid authority, e.g., www.example.com:8080. The host should be a valid hostname, IPv4
    * address, or IPv6 address.
-   * 
+   *
    * @throws IllegalArgumentException if the authority cannot be parsed
-   * 
+   *
    * @see #toString()
    */
   public static ModelHttpAuthority fromString(String s) {
@@ -84,6 +88,10 @@ public class ModelHttpAuthority {
     this.port = port;
   }
 
+  public ModelHttpAuthority(ModelHttpAuthorityBuilder that) {
+    this(that.host(), that.port());
+  }
+
   /**
    * @return the host
    */
@@ -91,11 +99,23 @@ public class ModelHttpAuthority {
     return host;
   }
 
+  public ModelHttpAuthority withHost(ModelHttpHost newHost) {
+    return toBuilder().host(newHost).build();
+  }
+
   /**
    * @return the port
    */
-  public OptionalInt getPort() {
-    return port != null ? OptionalInt.of(port.intValue()) : OptionalInt.empty();
+  public Integer getPort() {
+    return port;
+  }
+
+  public ModelHttpAuthority withPort(Integer newPort) {
+    return toBuilder().port(newPort).build();
+  }
+
+  public ModelHttpAuthorityBuilder toBuilder() {
+    return new ModelHttpAuthorityBuilder(this);
   }
 
   @Override
@@ -117,14 +137,14 @@ public class ModelHttpAuthority {
 
   /**
    * Returns a stringized form of this authority, e.g., www.example.com:8080.
-   * 
+   *
    * @see #fromString(String)
    */
   @Override
   public String toString() {
     String result = getHost().toString();
-    if (getPort().isPresent())
-      result = result + ":" + getPort().getAsInt();
+    if (getPort() != null)
+      result = result + ":" + getPort();
     return result;
   }
 }

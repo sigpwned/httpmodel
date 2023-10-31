@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +17,10 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.core.model;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -28,15 +29,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
-import com.sigpwned.httpmodel.core.ModelHttpHeaders.Header;
+import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 
 /**
  * Models HTTP Headers.
- * 
+ *
  * @see ModelHttpHeaderNames
  */
 public class ModelHttpHeaders implements Iterable<Header> {
+  public static ModelHttpHeadersBuilder builder() {
+    return new ModelHttpHeadersBuilder();
+  }
+
   /**
    * Models an HTTP header. Header names are lowercased automatically. Assumes all values are valid
    * ISO-8859-1 characters.
@@ -103,10 +108,16 @@ public class ModelHttpHeaders implements Iterable<Header> {
     return new ModelHttpHeaders(headers);
   }
 
-  private final List<Header> headers;
+  private final List<ModelHttpHeaders.Header> headers;
 
   public ModelHttpHeaders(List<Header> headers) {
-    this.headers = unmodifiableList(headers);
+    if (headers == null)
+      throw new NullPointerException();
+    this.headers = headers.isEmpty() ? emptyList() : unmodifiableList(headers);
+  }
+
+  /* default */ ModelHttpHeaders(ModelHttpHeadersBuilder that) {
+    this(that.headers());
   }
 
   /**
@@ -122,6 +133,10 @@ public class ModelHttpHeaders implements Iterable<Header> {
 
   public List<Header> findAllHeadersByName(String name) {
     return stream().filter(h -> h.getName().equalsIgnoreCase(name)).collect(toList());
+  }
+
+  public ModelHttpHeadersBuilder toBuilder() {
+    return new ModelHttpHeadersBuilder(this);
   }
 
   @Override

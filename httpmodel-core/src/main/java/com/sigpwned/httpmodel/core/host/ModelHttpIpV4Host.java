@@ -22,7 +22,7 @@ package com.sigpwned.httpmodel.core.host;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Objects;
-import com.sigpwned.httpmodel.core.ModelHttpHost;
+import com.sigpwned.httpmodel.core.model.ModelHttpHost;
 import com.sigpwned.httpmodel.core.org.apache.commons.validator.routines.InetAddressValidator;
 
 /**

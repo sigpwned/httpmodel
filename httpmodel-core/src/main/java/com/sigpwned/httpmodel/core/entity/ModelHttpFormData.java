@@ -30,8 +30,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import com.sigpwned.httpmodel.core.ModelHttpEntity;
 import com.sigpwned.httpmodel.core.entity.ModelHttpFormData.Entry;
+import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
 import com.sigpwned.httpmodel.core.util.ModelHttpEncodings;
 import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
 

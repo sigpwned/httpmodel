@@ -19,7 +19,7 @@
  */
 package com.sigpwned.httpmodel.core.util;
 
-import com.sigpwned.httpmodel.core.ModelHttpMediaType;
+import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 
 /**
  * Constants for common MIME content types

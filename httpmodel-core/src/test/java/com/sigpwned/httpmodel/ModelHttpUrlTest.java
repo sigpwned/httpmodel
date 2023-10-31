@@ -23,9 +23,9 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Test;
-import com.sigpwned.httpmodel.core.ModelHttpAuthority;
-import com.sigpwned.httpmodel.core.ModelHttpQueryString;
-import com.sigpwned.httpmodel.core.ModelHttpUrl;
+import com.sigpwned.httpmodel.core.model.ModelHttpAuthority;
+import com.sigpwned.httpmodel.core.model.ModelHttpQueryString;
+import com.sigpwned.httpmodel.core.model.ModelHttpUrl;
 import com.sigpwned.httpmodel.core.util.ModelHttpSchemes;
 
 public class ModelHttpUrlTest {

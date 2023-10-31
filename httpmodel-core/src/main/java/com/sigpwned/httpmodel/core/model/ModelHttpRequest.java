@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.core.model;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -28,6 +28,10 @@ import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
  * Models an HTTP request
  */
 public class ModelHttpRequest {
+  public static ModelHttpRequestBuilder builder() {
+    return new ModelHttpRequestBuilder();
+  }
+
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
       ModelHttpEntity entity) {
     return of(version, method, url, ModelHttpHeaders.of(), entity);
@@ -81,11 +85,19 @@ public class ModelHttpRequest {
     this.entity = entity;
   }
 
+  /* default */ ModelHttpRequest(ModelHttpRequestBuilder that) {
+    this(that.version(), that.method(), that.url(), that.headers(), that.entity());
+  }
+
   /**
    * @return the version
    */
   public String getVersion() {
     return version;
+  }
+
+  public ModelHttpRequest withVersion(String newVersion) {
+    return toBuilder().version(newVersion).build();
   }
 
   /**
@@ -95,11 +107,19 @@ public class ModelHttpRequest {
     return method;
   }
 
+  public ModelHttpRequest withMethod(String newMethod) {
+    return toBuilder().method(newMethod).build();
+  }
+
   /**
    * @return the url
    */
   public ModelHttpUrl getUrl() {
     return url;
+  }
+
+  public ModelHttpRequest withUrl(ModelHttpUrl newUrl) {
+    return toBuilder().url(newUrl).build();
   }
 
   /**
@@ -109,11 +129,23 @@ public class ModelHttpRequest {
     return headers;
   }
 
+  public ModelHttpRequest withHeaders(ModelHttpHeaders newHeaders) {
+    return toBuilder().headers(newHeaders).build();
+  }
+
   /**
    * @return the entity
    */
   public Optional<ModelHttpEntity> getEntity() {
     return Optional.ofNullable(entity);
+  }
+
+  public ModelHttpRequest withEntity(ModelHttpEntity newEntity) {
+    return toBuilder().entity(newEntity).build();
+  }
+
+  public ModelHttpRequestBuilder toBuilder() {
+    return new ModelHttpRequestBuilder(this);
   }
 
   @Override

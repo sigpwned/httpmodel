@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.core.model;
 
 import java.util.Objects;
 import com.sigpwned.httpmodel.core.host.ModelHttpHostnameHost;

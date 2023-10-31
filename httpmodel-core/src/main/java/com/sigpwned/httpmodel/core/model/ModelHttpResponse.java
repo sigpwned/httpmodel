@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.core.model;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -27,6 +27,10 @@ import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
  * Models an HTTP response
  */
 public class ModelHttpResponse {
+  public static ModelHttpResponseBuilder builder() {
+    return new ModelHttpResponseBuilder();
+  }
+
   public static ModelHttpResponse of(int statusCode, ModelHttpEntity entity) {
     return of(statusCode, ModelHttpHeaders.of(), entity);
   }
@@ -58,11 +62,19 @@ public class ModelHttpResponse {
     this.entity = entity;
   }
 
+  /* default */ ModelHttpResponse(ModelHttpResponseBuilder that) {
+    this(that.statusCode(), that.headers(), that.entity());
+  }
+
   /**
    * @return the statusCode
    */
   public int getStatusCode() {
     return statusCode;
+  }
+
+  public ModelHttpResponse withStatusCode(int newStatusCode) {
+    return toBuilder().statusCode(newStatusCode).build();
   }
 
   /**
@@ -72,11 +84,23 @@ public class ModelHttpResponse {
     return headers;
   }
 
+  public ModelHttpResponse withHeaders(ModelHttpHeaders newHeaders) {
+    return toBuilder().headers(newHeaders).build();
+  }
+
   /**
    * @return the entity
    */
   public Optional<ModelHttpEntity> getEntity() {
     return Optional.ofNullable(entity);
+  }
+
+  public ModelHttpResponse withEntity(ModelHttpEntity newEntity) {
+    return toBuilder().entity(newEntity).build();
+  }
+
+  public ModelHttpResponseBuilder toBuilder() {
+    return new ModelHttpResponseBuilder(this);
   }
 
   @Override

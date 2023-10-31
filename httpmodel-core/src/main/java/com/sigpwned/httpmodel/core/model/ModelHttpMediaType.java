@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.core.model;
 
 import static java.util.stream.Collectors.toMap;
 import java.nio.charset.Charset;
@@ -31,6 +31,10 @@ import java.util.regex.Pattern;
  * Models a MIME type.
  */
 public class ModelHttpMediaType {
+  public static ModelHttpMediaTypeBuilder builder() {
+    return new ModelHttpMediaTypeBuilder();
+  }
+
   public static final String WILDCARD = "*";
 
   private static final String CHARSET = "charset";
@@ -47,7 +51,7 @@ public class ModelHttpMediaType {
    * Parses a valid mime type, e.g., text/plain; charset=utf-8.
    *
    * @throws IllegalArgumentException if the MIME type cannot be parsed
-   * 
+   *
    * @see #toString()
    */
   public static ModelHttpMediaType fromString(String s) {
@@ -122,11 +126,19 @@ public class ModelHttpMediaType {
     this.charset = charset;
   }
 
+  /* default */ ModelHttpMediaType(ModelHttpMediaTypeBuilder that) {
+    this(that.type(), that.subtype(), that.charset());
+  }
+
   /**
    * @return the type
    */
   public String getType() {
     return type;
+  }
+
+  public ModelHttpMediaType withType(String type) {
+    return toBuilder().type(type).build();
   }
 
   /**
@@ -136,12 +148,16 @@ public class ModelHttpMediaType {
     return subtype;
   }
 
+  public ModelHttpMediaType withSubtype(String subtype) {
+    return toBuilder().subtype(subtype).build();
+  }
+
   public Optional<Charset> getCharset() {
     return Optional.ofNullable(charset);
   }
 
   public ModelHttpMediaType withCharset(Charset charset) {
-    return new ModelHttpMediaType(getType(), getSubtype(), charset);
+    return toBuilder().charset(charset).build();
   }
 
   /**
@@ -156,6 +172,10 @@ public class ModelHttpMediaType {
       }
     }
     return false;
+  }
+
+  public ModelHttpMediaTypeBuilder toBuilder() {
+    return new ModelHttpMediaTypeBuilder(this);
   }
 
   @Override
@@ -178,7 +198,7 @@ public class ModelHttpMediaType {
 
   /**
    * Returns a valid mime type string for this object
-   * 
+   *
    * @see #fromString(String)
    */
   @Override

@@ -1,8 +1,8 @@
 /*-
  * =================================LICENSE_START==================================
- * httpmodel-core
+ * httpmodel-aws
  * ====================================SECTION=====================================
- * Copyright (C) 2022 Andy Boothe
+ * Copyright (C) 2022 - 2023 Andy Boothe
  * ====================================SECTION=====================================
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,9 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel;
+package com.sigpwned.httpmodel.aws;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import org.junit.Test;
-import com.sigpwned.httpmodel.core.model.ModelHttpQueryString;
-
-public class ModelHttpQueryStringTest {
-  @Test
-  public void shouldEncodeProperly() {
-    final ModelHttpQueryString queryString =
-        ModelHttpQueryString.of(asList(ModelHttpQueryString.Parameter.of("alpha", "bravo!"),
-            ModelHttpQueryString.Parameter.of("charlie", "delta echo")));
-
-    assertThat(queryString.toString(), is("alpha=bravo%21&charlie=delta%20echo"));
-  }
+@FunctionalInterface
+public interface AwsSigningCredentialsProvider {
+  public AwsSigningCredentials getCredentials();
 }

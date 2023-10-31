@@ -30,11 +30,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import com.sigpwned.httpmodel.core.ModelHttpEntity;
-import com.sigpwned.httpmodel.core.ModelHttpHeaders;
-import com.sigpwned.httpmodel.core.ModelHttpMediaType;
-import com.sigpwned.httpmodel.core.ModelHttpRequest;
-import com.sigpwned.httpmodel.core.ModelHttpResponse;
+import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
+import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
+import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
+import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
+import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 
 /**
  * Converts model objects to and from the Java 11 built-in HTTP client implementation. This is for
