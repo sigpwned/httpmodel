@@ -29,9 +29,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
-import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 
@@ -59,17 +57,15 @@ public final class ModelHttpURLConnections {
     for (ModelHttpHeaders.Header header : request.getHeaders())
       result.setRequestProperty(header.getName(), header.getValue());
 
-    if (request.getEntity().isPresent()) {
-      ModelHttpEntity entity = request.getEntity().get();
-
-      result.setRequestProperty(ModelHttpHeaderNames.CONTENT_TYPE, entity.getType().toString());
+    if (request.hasEntity()) {
+      request.getContentType().ifPresent(contentType -> {
+        result.setRequestProperty(ModelHttpHeaderNames.CONTENT_TYPE, contentType.toString());
+      });
 
       result.setDoOutput(true);
 
       try (OutputStream out = result.getOutputStream()) {
-        try (InputStream in = entity.readBytes()) {
-          MoreByteStreams.drain(in, out);
-        }
+        MoreByteStreams.drain(request, out);
       }
     } else {
       result.setDoOutput(false);
@@ -102,29 +98,17 @@ public final class ModelHttpURLConnections {
       }
     }
 
-    ModelHttpEntity entity;
+    InputStream entity;
     if (ModelHttpEntities.responseEntityExists(cn.getRequestMethod(), statusCode)) {
-      ModelHttpMediaType contentType =
-          headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
-              .map(ModelHttpHeaders.Header::getValue).map(ModelHttpMediaType::fromString)
-              .findFirst().orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM);
-
-      byte[] data;
       if (statusCode / 100 == 2) {
-        try (InputStream in = cn.getInputStream()) {
-          data = MoreByteStreams.toByteArray(in);
-        }
+        entity = cn.getInputStream();
       } else {
-        try (InputStream in = cn.getErrorStream()) {
-          data = MoreByteStreams.toByteArray(in);
-        }
+        entity = cn.getErrorStream();
       }
-
-      entity = ModelHttpEntity.of(contentType, data);
     } else {
       entity = null;
     }
 
-    return ModelHttpResponse.of(statusCode, ModelHttpHeaders.of(headers), entity);
+    return new ModelHttpResponse(statusCode, ModelHttpHeaders.of(headers), entity);
   }
 }

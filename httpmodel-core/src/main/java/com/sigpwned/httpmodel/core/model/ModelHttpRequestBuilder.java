@@ -19,7 +19,9 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
-import java.util.Objects;
+import java.io.IOException;
+import java.io.InputStream;
+import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
 /**
@@ -34,8 +36,6 @@ public class ModelHttpRequestBuilder {
 
   private ModelHttpHeaders headers;
 
-  private ModelHttpEntity entity;
-
   public ModelHttpRequestBuilder() {
     this.version = ModelHttpVersions.DEFAULT;
   }
@@ -45,7 +45,6 @@ public class ModelHttpRequestBuilder {
     this.method = that.method;
     this.url = that.url;
     this.headers = that.headers;
-    this.entity = that.entity;
   }
 
   public ModelHttpRequestBuilder(ModelHttpRequest that) {
@@ -53,7 +52,6 @@ public class ModelHttpRequestBuilder {
     this.method = that.getMethod();
     this.url = that.getUrl();
     this.headers = that.getHeaders();
-    this.entity = that.getEntity().orElse(null);
   }
 
   public String version() {
@@ -92,41 +90,20 @@ public class ModelHttpRequestBuilder {
     return this;
   }
 
-  public ModelHttpEntity entity() {
-    return entity;
+  public ModelHttpRequest build(ModelHttpEntity entity) throws IOException {
+    ModelHttpRequest result = null;
+    ModelHttpEntityInputStream stream = entity.toEntityInputStream();
+    try {
+      headers(headers().toBuilder().setOnlyHeader(ModelHttpHeaderNames.CONTENT_TYPE, null).build());
+      result = new ModelHttpRequest(this, stream);
+    } finally {
+      if (result == null)
+        stream.close();
+    }
+    return result;
   }
 
-  public ModelHttpRequestBuilder entity(ModelHttpEntity entity) {
-    this.entity = entity;
-    return this;
-  }
-
-  public ModelHttpRequest build() {
-    return new ModelHttpRequest(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(entity, headers, method, url, version);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    ModelHttpRequestBuilder other = (ModelHttpRequestBuilder) obj;
-    return Objects.equals(entity, other.entity) && Objects.equals(headers, other.headers)
-        && Objects.equals(method, other.method) && Objects.equals(url, other.url)
-        && Objects.equals(version, other.version);
-  }
-
-  @Override
-  public String toString() {
-    return "ModelHttpRequestBuilder [version=" + version + ", method=" + method + ", url=" + url
-        + ", headers=" + headers + ", entity=" + entity + "]";
+  public ModelHttpRequest build(InputStream entity) {
+    return new ModelHttpRequest(this, entity);
   }
 }

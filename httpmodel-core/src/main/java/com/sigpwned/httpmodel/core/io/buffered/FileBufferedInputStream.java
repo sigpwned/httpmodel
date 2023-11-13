@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.OptionalLong;
 import com.sigpwned.httpmodel.core.io.BufferedInputStream;
 
 public class FileBufferedInputStream extends BufferedInputStream {
@@ -11,9 +12,14 @@ public class FileBufferedInputStream extends BufferedInputStream {
   private final boolean deleteOnClose;
 
   public FileBufferedInputStream(File file, boolean deleteOnClose) throws IOException {
-    super(new FileInputStream(file));
     this.file = file;
     this.deleteOnClose = deleteOnClose;
+    in = newInputStream();
+  }
+
+  @Override
+  public OptionalLong length() throws IOException {
+    return OptionalLong.of(file.length());
   }
 
   @Override

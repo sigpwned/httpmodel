@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,10 +27,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.model.ModelHttpAuthority;
-import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
 import com.sigpwned.httpmodel.core.model.ModelHttpHost;
-import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpQueryString;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
@@ -85,32 +83,20 @@ public final class ModelHttpServlets {
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.TRANSFER_ENCODING))
             .findFirst().orElse(null);
 
-    ModelHttpEntity entity;
+    InputStream entity;
     if (contentTypeHeader != null || contentLengthHeader != null
         || transferEncodingHeader != null) {
-      ModelHttpMediaType type =
-          headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
-              .map(ModelHttpHeaders.Header::getValue).map(ModelHttpMediaType::fromString)
-              .findFirst().orElse(null);
-
-      byte[] entityBody;
-      try (InputStream in = request.getInputStream()) {
-        entityBody = MoreByteStreams.toByteArray(in);
-      }
-
-      entity = ModelHttpEntity.of(
-          Optional.ofNullable(type).orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM),
-          entityBody);
+      entity = request.getInputStream();
     } else {
       entity = null;
     }
 
-    return ModelHttpRequest.of(version, method, url, ModelHttpHeaders.of(headers), entity);
+    return new ModelHttpRequest(version, method, url, ModelHttpHeaders.of(headers), entity);
   }
 
   /**
    * Fills in the given {@link HttpServletResponse} from the given {@link ModelHttpResponse}
-   * 
+   *
    * @throws IOException
    */
   public static HttpServletResponse toResponse(HttpServletResponse result,
@@ -123,18 +109,16 @@ public final class ModelHttpServlets {
       result.addHeader(header.getName(), header.getValue());
     }
 
-    if (response.getEntity().isPresent()) {
-      ModelHttpEntity entity = response.getEntity().get();
+    if (response.hasEntity()) {
+      result.setContentType(response.getContentType()
+          .orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM).toString());
 
-      result.setContentType(
-          entity.getType().orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM).toString());
-
-      result.setContentLength(entity.length());
+      response.length().ifPresent(length -> {
+        result.setContentLengthLong(length);
+      });
 
       try (OutputStream out = result.getOutputStream()) {
-        try (InputStream in = entity.readBytes()) {
-          MoreByteStreams.drain(in, out);
-        }
+        MoreByteStreams.drain(response, out);
       }
     }
 

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,9 @@
  */
 package com.sigpwned.httpmodel.client.java11.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,14 +31,11 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
+import com.sigpwned.httpmodel.core.io.InputStreamBufferingStrategy;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
-import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
-import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
 
 /**
  * Converts model objects to and from the Java 11 built-in HTTP client implementation. This is for
@@ -45,11 +45,16 @@ public final class Java11ModelHttpClients {
   private Java11ModelHttpClients() {}
 
   /**
-   * Converts the given request into an {@link HttpRequest} object. Does not send the request.
-   * 
-   * @throws MalformedURLException
+   * Converts the given request into an {@link HttpRequest} object. Does not send the request. If
+   * the request has not already been buffered, then this method buffers it using the default
+   * buffering strategy.
+   *
+   * @throws IOException
+   *
+   * @see ModelHttpRequest#buffer(InputStreamBufferingStrategy)
+   * @see InputStreamBufferingStrategy#DEFAULT
    */
-  public static HttpRequest toRequest(ModelHttpRequest request) throws MalformedURLException {
+  public static HttpRequest toRequest(ModelHttpRequest request) throws IOException {
     URI uri;
     try {
       uri = request.getUrl().toUrl().toURI();
@@ -62,11 +67,24 @@ public final class Java11ModelHttpClients {
     for (ModelHttpHeaders.Header header : request.getHeaders())
       result.header(header.getName(), header.getValue());
 
-    if (request.getEntity().isPresent()) {
-      ModelHttpEntity entity = request.getEntity().get();
-      result.method(request.getMethod(), BodyPublishers.ofByteArray(entity.toByteArray()));
-      if (entity.getType().isPresent())
-        result.setHeader(ModelHttpHeaderNames.CONTENT_TYPE, entity.getType().toString());
+    if (request.hasEntity()) {
+      if (!request.isBuffered())
+        request.buffer(InputStreamBufferingStrategy.DEFAULT);
+      request.getContentType().ifPresent(contentType -> {
+        result.setHeader(ModelHttpHeaderNames.CONTENT_TYPE, contentType.toString());
+      });
+      try {
+        result.method(request.getMethod(), BodyPublishers.ofInputStream(() -> {
+          try {
+            request.restart();
+          } catch (IOException e) {
+            throw new UncheckedIOException(e);
+          }
+          return request;
+        }));
+      } catch (UncheckedIOException e) {
+        throw e.getCause();
+      }
     } else {
       result.method(request.getMethod(), BodyPublishers.noBody());
     }
@@ -77,7 +95,7 @@ public final class Java11ModelHttpClients {
   /**
    * Converts an {@link HttpResponse} to a {@link ModelHttpResponse}.
    */
-  public static ModelHttpResponse fromResponse(HttpResponse<byte[]> response) {
+  public static ModelHttpResponse fromResponse(HttpResponse<InputStream> response) {
     int statusCode = response.statusCode();
 
     List<ModelHttpHeaders.Header> headers = new ArrayList<>();
@@ -99,17 +117,14 @@ public final class Java11ModelHttpClients {
         headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.TRANSFER_ENCODING))
             .findFirst().orElse(null);
 
-    ModelHttpEntity entity;
+    InputStream entity;
     if (contentTypeHeader != null || contentLengthHeader != null
         || transferEncodingHeader != null) {
-      ModelHttpMediaType contentType = Optional.ofNullable(contentTypeHeader)
-          .map(ModelHttpHeaders.Header::getValue).map(ModelHttpMediaType::fromString)
-          .orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM);
-      entity = ModelHttpEntity.of(contentType, response.body());
+      entity = response.body();
     } else {
       entity = null;
     }
 
-    return ModelHttpResponse.of(statusCode, ModelHttpHeaders.of(headers), entity);
+    return new ModelHttpResponse(statusCode, ModelHttpHeaders.of(headers), entity);
   }
 }

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import com.sigpwned.httpmodel.core.io.buffered.FileBufferedInputStream;
 import com.sigpwned.httpmodel.core.io.buffered.MemoryBufferedInputStream;
+import com.sigpwned.httpmodel.core.io.buffered.NullBufferedInputStream;
 import com.sigpwned.httpmodel.core.util.MoreByteStreams;
 
 @FunctionalInterface
@@ -26,6 +27,8 @@ public interface InputStreamBufferer {
       public BufferedInputStream buffer(InputStream in) throws IOException {
         byte[] buf = new byte[DEFAULT_MAX_BUFFER_SIZE];
         int nread = MoreByteStreams.read(in, buf);
+        if (nread == 0)
+          return new NullBufferedInputStream();
         if (nread < buf.length)
           return new MemoryBufferedInputStream(buf, 0, nread);
 
@@ -36,6 +39,7 @@ public interface InputStreamBufferer {
             out.write(buf, 0, nread);
             MoreByteStreams.drain(in, out);
           }
+          result = new FileBufferedInputStream(tmp, true);
         } finally {
           if (result == null)
             tmp.delete();

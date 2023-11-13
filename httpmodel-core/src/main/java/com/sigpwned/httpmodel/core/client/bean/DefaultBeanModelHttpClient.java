@@ -71,7 +71,7 @@ public class DefaultBeanModelHttpClient implements BeanModelHttpClient {
       if (mappedException != null)
         throw mappedException;
 
-      if (!filteredHttpResponse.getEntity().isPresent())
+      if (!filteredHttpResponse.hasEntity())
         return null;
 
       ModelHttpMediaType responseMediaType = filteredHttpResponse.getHeaders()

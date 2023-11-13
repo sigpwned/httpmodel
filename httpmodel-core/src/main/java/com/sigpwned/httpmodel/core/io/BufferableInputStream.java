@@ -2,6 +2,7 @@ package com.sigpwned.httpmodel.core.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.OptionalLong;
 
 public class BufferableInputStream extends InputStream {
   private boolean start;
@@ -35,9 +36,18 @@ public class BufferableInputStream extends InputStream {
   public void restart() throws IOException {
     if (buffered == false)
       throw new IllegalStateException("not buffered");
+    if (start == true)
+      return;
     BufferedInputStream bufferedInput = (BufferedInputStream) input;
     bufferedInput.restart();
     start = true;
+  }
+
+  public OptionalLong length() throws IOException {
+    if (buffered == false)
+      return OptionalLong.empty();
+    BufferedInputStream bufferedInput = (BufferedInputStream) input;
+    return bufferedInput.length();
   }
 
   /**

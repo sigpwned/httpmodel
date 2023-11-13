@@ -1,73 +1,35 @@
 package com.sigpwned.httpmodel.core.io;
 
 import java.io.FileNotFoundException;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.OptionalLong;
 
-public abstract class BufferedInputStream extends InputStream {
-  private InputStream input;
-
-  public BufferedInputStream(InputStream input) {
-    if (input == null)
-      throw new NullPointerException();
-    this.input = input;
+public abstract class BufferedInputStream extends FilterInputStream {
+  public BufferedInputStream() {
+    super(null);
   }
 
   public void restart() throws IOException {
-    input.close();
-    input = newInputStream();
+    InputStream newInputStream = newInputStream();
+    if (newInputStream == null)
+      throw new NullPointerException();
+    in.close();
+    in = newInputStream;
   }
 
-  @Override
-  public int available() throws IOException {
-    return input.available();
-  }
-
-  @Override
-  public synchronized void mark(int readlimit) {
-    input.mark(readlimit);
-  }
-
-  @Override
-  public boolean markSupported() {
-    return input.markSupported();
-  }
-
-  @Override
-  public int read() throws IOException {
-    return input.read();
-  }
-
-  @Override
-  public int read(byte[] b, int off, int len) throws IOException {
-    return input.read(b, off, len);
-  }
-
-  @Override
-  public int read(byte[] b) throws IOException {
-    return input.read(b);
-  }
-
-  @Override
-  public synchronized void reset() throws IOException {
-    input.reset();
-  }
-
-  @Override
-  public long skip(long n) throws IOException {
-    return input.skip(n);
-  }
-
-  @Override
-  public void close() throws IOException {
-    input.close();
-  }
+  /**
+   * total bytes, not remaining
+   */
+  public abstract OptionalLong length() throws IOException;
 
   /**
    * hook
    *
    * @param file
-   * @return
+   * @return An {@link InputStream} containing the same bytes as the original argument to the
+   *         constructor. Must not be {@code null}.
    * @throws FileNotFoundException
    */
   protected abstract InputStream newInputStream() throws IOException;

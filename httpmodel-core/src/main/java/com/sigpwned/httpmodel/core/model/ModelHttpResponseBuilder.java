@@ -19,7 +19,7 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
-import java.util.Objects;
+import java.io.InputStream;
 
 /**
  * Models an HTTP response
@@ -29,8 +29,6 @@ public class ModelHttpResponseBuilder {
 
   private ModelHttpHeaders headers;
 
-  private ModelHttpEntity entity;
-
   public ModelHttpResponseBuilder() {}
 
   public ModelHttpResponseBuilder(ModelHttpResponseBuilder that) {
@@ -38,7 +36,6 @@ public class ModelHttpResponseBuilder {
       throw new NullPointerException();
     this.statusCode = that.statusCode;
     this.headers = that.headers;
-    this.entity = that.entity;
   }
 
   public ModelHttpResponseBuilder(ModelHttpResponse that) {
@@ -46,7 +43,6 @@ public class ModelHttpResponseBuilder {
       throw new NullPointerException();
     this.statusCode = that.getStatusCode();
     this.headers = that.getHeaders();
-    this.entity = that.getEntity().orElse(null);
   }
 
   public int statusCode() {
@@ -67,40 +63,12 @@ public class ModelHttpResponseBuilder {
     return this;
   }
 
-  public ModelHttpEntity entity() {
-    return entity;
-  }
-
-  public ModelHttpResponseBuilder entity(ModelHttpEntity entity) {
-    this.entity = entity;
-    return this;
-  }
-
-  public ModelHttpResponse build() {
-    return new ModelHttpResponse(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(entity, headers, statusCode);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    ModelHttpResponseBuilder other = (ModelHttpResponseBuilder) obj;
-    return Objects.equals(entity, other.entity) && Objects.equals(headers, other.headers)
-        && statusCode == other.statusCode;
+  public ModelHttpResponse build(InputStream entity) {
+    return new ModelHttpResponse(this, entity);
   }
 
   @Override
   public String toString() {
-    return "ModelHttpResponseBuilder [statusCode=" + statusCode + ", headers=" + headers
-        + ", entity=" + entity + "]";
+    return "ModelHttpResponseBuilder [statusCode=" + statusCode + ", headers=" + headers + "]";
   }
 }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@
 package com.sigpwned.httpmodel.client.java11;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -51,9 +52,9 @@ public class Java11ModelHttpClient implements ModelHttpClient {
   public ModelHttpResponse send(ModelHttpRequest modelRequest) throws IOException {
     HttpRequest java11Request = Java11ModelHttpClients.toRequest(modelRequest);
 
-    HttpResponse<byte[]> java11Response;
+    HttpResponse<InputStream> java11Response;
     try {
-      java11Response = getClient().send(java11Request, BodyHandlers.ofByteArray());
+      java11Response = getClient().send(java11Request, BodyHandlers.ofInputStream());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new InterruptedIOException("interrupted");
@@ -71,7 +72,7 @@ public class Java11ModelHttpClient implements ModelHttpClient {
     return Java11ModelHttpClients.toRequest(modelRequest);
   }
 
-  protected ModelHttpResponse transformResponse(HttpResponse<byte[]> java11Response) {
+  protected ModelHttpResponse transformResponse(HttpResponse<InputStream> java11Response) {
     return Java11ModelHttpClients.fromResponse(java11Response);
   }
 

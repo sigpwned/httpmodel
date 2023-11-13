@@ -19,31 +19,18 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
-import java.io.IOException;
-import java.util.Objects;
+import java.io.InputStream;
 import java.util.Optional;
+import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
+import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
 
 /**
  * Models an HTTP response
  */
-public class ModelHttpResponse implements AutoCloseable {
+public class ModelHttpResponse extends ModelHttpEntityInputStream {
   public static ModelHttpResponseBuilder builder() {
     return new ModelHttpResponseBuilder();
-  }
-
-  public static ModelHttpResponse of(int statusCode, ModelHttpEntity entity) {
-    return of(statusCode, ModelHttpHeaders.of(), entity);
-  }
-
-  public static ModelHttpResponse of(int statusCode, ModelHttpHeaders headers,
-      ModelHttpEntity entity) {
-    return new ModelHttpResponse(statusCode, headers, entity);
-  }
-
-  public static ModelHttpResponse of(int statusCode, ModelHttpHeaders headers,
-      Optional<ModelHttpEntity> entity) {
-    return new ModelHttpResponse(statusCode, headers, entity.orElse(null));
   }
 
   /**
@@ -53,18 +40,16 @@ public class ModelHttpResponse implements AutoCloseable {
 
   private final ModelHttpHeaders headers;
 
-  private final ModelHttpEntity entity;
-
-  public ModelHttpResponse(int statusCode, ModelHttpHeaders headers, ModelHttpEntity entity) {
+  public ModelHttpResponse(int statusCode, ModelHttpHeaders headers, InputStream entity) {
+    super(entity);
     if (headers == null)
       throw new NullPointerException();
     this.statusCode = statusCode;
     this.headers = headers;
-    this.entity = entity;
   }
 
-  /* default */ ModelHttpResponse(ModelHttpResponseBuilder that) {
-    this(that.statusCode(), that.headers(), that.entity());
+  /* default */ ModelHttpResponse(ModelHttpResponseBuilder b, InputStream entity) {
+    this(b.statusCode(), b.headers(), entity);
   }
 
   /**
@@ -74,10 +59,6 @@ public class ModelHttpResponse implements AutoCloseable {
     return statusCode;
   }
 
-  public ModelHttpResponse withStatusCode(int newStatusCode) {
-    return toBuilder().statusCode(newStatusCode).build();
-  }
-
   /**
    * @return the headers
    */
@@ -85,52 +66,16 @@ public class ModelHttpResponse implements AutoCloseable {
     return headers;
   }
 
-  public ModelHttpResponse withHeaders(ModelHttpHeaders newHeaders) {
-    return toBuilder().headers(newHeaders).build();
-  }
-
-  /**
-   * @return the entity
-   */
-  public Optional<ModelHttpEntity> getEntity() {
-    return Optional.ofNullable(entity);
-  }
-
-  public ModelHttpResponse withEntity(ModelHttpEntity newEntity) {
-    return toBuilder().entity(newEntity).build();
-  }
-
   @Override
-  public void close() throws IOException {
-    if (getEntity().isPresent())
-      getEntity().get().close();
-  }
-
-  public ModelHttpResponseBuilder toBuilder() {
-    return new ModelHttpResponseBuilder(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(entity, headers, statusCode);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    ModelHttpResponse other = (ModelHttpResponse) obj;
-    return Objects.equals(entity, other.entity) && Objects.equals(headers, other.headers)
-        && statusCode == other.statusCode;
+  public Optional<ModelHttpMediaType> getContentType() {
+    if (!hasEntity())
+      return Optional.empty();
+    return this.getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
+        .map(Header::getValue).map(ModelHttpMediaType::fromString);
   }
 
   @Override
   public String toString() {
-    return "ModelHttpResponse [statusCode=" + statusCode + ", headers=" + headers + ", entity="
-        + entity + "]";
+    return "ModelHttpResponse [statusCode=" + statusCode + ", headers=" + headers + "]";
   }
 }

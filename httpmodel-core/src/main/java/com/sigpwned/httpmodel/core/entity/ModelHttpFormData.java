@@ -32,14 +32,17 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import com.sigpwned.httpmodel.core.entity.ModelHttpFormData.Entry;
+import com.sigpwned.httpmodel.core.io.buffered.MemoryBufferedInputStream;
 import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
+import com.sigpwned.httpmodel.core.model.ModelHttpEntityInputStream;
+import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.util.ModelHttpEncodings;
 import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
 
 /**
  * Models an HTTP entity of type application/x-www-form-urlencoded.
  */
-public class ModelHttpFormData implements Iterable<Entry> {
+public class ModelHttpFormData extends ModelHttpEntity implements Iterable<Entry> {
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
   private static final Pattern EQUALS = Pattern.compile("=");
@@ -130,7 +133,7 @@ public class ModelHttpFormData implements Iterable<Entry> {
    *
    * @see #fromString(String)
    */
-  public static ModelHttpFormData fromEntity(ModelHttpEntity entity) throws IOException {
+  public static ModelHttpFormData fromEntity(ModelHttpEntityInputStream entity) throws IOException {
     return fromString(entity.toString(StandardCharsets.UTF_8));
   }
 
@@ -195,8 +198,15 @@ public class ModelHttpFormData implements Iterable<Entry> {
     return Objects.equals(entries, other.entries);
   }
 
-  public ModelHttpEntity toEntity() {
-    return ModelHttpEntity.of(ModelHttpMediaTypes.APPLICATION_X_WWW_FORM_URLENCODED, toString());
+  @Override
+  public ModelHttpEntityInputStream toEntityInputStream() {
+    return new ModelHttpEntityInputStream(
+        new MemoryBufferedInputStream(toString(), StandardCharsets.UTF_8)) {
+      @Override
+      public Optional<ModelHttpMediaType> getContentType() {
+        return Optional.of(ModelHttpMediaTypes.APPLICATION_X_WWW_FORM_URLENCODED);
+      }
+    };
   }
 
   /**

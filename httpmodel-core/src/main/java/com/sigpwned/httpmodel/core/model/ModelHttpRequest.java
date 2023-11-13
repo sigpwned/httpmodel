@@ -19,58 +19,19 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
-import java.io.IOException;
-import java.util.Objects;
+import java.io.InputStream;
 import java.util.Optional;
+import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
+import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
 /**
  * Models an HTTP request
  */
-public class ModelHttpRequest implements AutoCloseable {
+public class ModelHttpRequest extends ModelHttpEntityInputStream {
   public static ModelHttpRequestBuilder builder() {
     return new ModelHttpRequestBuilder();
-  }
-
-  public static ModelHttpRequest of(String method, ModelHttpUrl url, ModelHttpEntity entity) {
-    return of(ModelHttpVersions.DEFAULT, method, url, ModelHttpHeaders.of(), entity);
-  }
-
-  public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
-      ModelHttpEntity entity) {
-    return of(version, method, url, ModelHttpHeaders.of(), entity);
-  }
-
-  public static ModelHttpRequest of(String method, ModelHttpUrl url, ModelHttpHeaders headers,
-      ModelHttpEntity entity) {
-    return new ModelHttpRequest(ModelHttpVersions.DEFAULT, method, url, headers, entity);
-  }
-
-  public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
-      ModelHttpHeaders headers, ModelHttpEntity entity) {
-    return new ModelHttpRequest(version, method, url, headers, entity);
-  }
-
-  public static ModelHttpRequest of(String method, ModelHttpUrl url,
-      Optional<ModelHttpEntity> entity) {
-    return of(ModelHttpVersions.DEFAULT, method, url, ModelHttpHeaders.of(), entity.orElse(null));
-  }
-
-  public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
-      Optional<ModelHttpEntity> entity) {
-    return of(version, method, url, ModelHttpHeaders.of(), entity.orElse(null));
-  }
-
-  public static ModelHttpRequest of(String method, ModelHttpUrl url, ModelHttpHeaders headers,
-      Optional<ModelHttpEntity> entity) {
-    return new ModelHttpRequest(ModelHttpVersions.DEFAULT, method, url, headers,
-        entity.orElse(null));
-  }
-
-  public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
-      ModelHttpHeaders headers, Optional<ModelHttpEntity> entity) {
-    return new ModelHttpRequest(version, method, url, headers, entity.orElse(null));
   }
 
   /**
@@ -87,10 +48,9 @@ public class ModelHttpRequest implements AutoCloseable {
 
   private final ModelHttpHeaders headers;
 
-  private final ModelHttpEntity entity;
-
   public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
-      ModelHttpEntity entity) {
+      InputStream entity) {
+    super(entity);
     if (version == null)
       throw new NullPointerException();
     if (method == null)
@@ -103,11 +63,10 @@ public class ModelHttpRequest implements AutoCloseable {
     this.method = method.toUpperCase();
     this.url = url;
     this.headers = headers;
-    this.entity = entity;
   }
 
-  /* default */ ModelHttpRequest(ModelHttpRequestBuilder that) {
-    this(that.version(), that.method(), that.url(), that.headers(), that.entity());
+  /* default */ ModelHttpRequest(ModelHttpRequestBuilder b, InputStream entity) {
+    this(b.version(), b.method(), b.url(), b.headers(), entity);
   }
 
   /**
@@ -117,19 +76,11 @@ public class ModelHttpRequest implements AutoCloseable {
     return version;
   }
 
-  public ModelHttpRequest withVersion(String newVersion) {
-    return toBuilder().version(newVersion).build();
-  }
-
   /**
    * @return the method
    */
   public String getMethod() {
     return method;
-  }
-
-  public ModelHttpRequest withMethod(String newMethod) {
-    return toBuilder().method(newMethod).build();
   }
 
   /**
@@ -139,10 +90,6 @@ public class ModelHttpRequest implements AutoCloseable {
     return url;
   }
 
-  public ModelHttpRequest withUrl(ModelHttpUrl newUrl) {
-    return toBuilder().url(newUrl).build();
-  }
-
   /**
    * @return the headers
    */
@@ -150,19 +97,12 @@ public class ModelHttpRequest implements AutoCloseable {
     return headers;
   }
 
-  public ModelHttpRequest withHeaders(ModelHttpHeaders newHeaders) {
-    return toBuilder().headers(newHeaders).build();
-  }
-
-  /**
-   * @return the entity
-   */
-  public Optional<ModelHttpEntity> getEntity() {
-    return Optional.ofNullable(entity);
-  }
-
-  public ModelHttpRequest withEntity(ModelHttpEntity newEntity) {
-    return toBuilder().entity(newEntity).build();
+  @Override
+  public Optional<ModelHttpMediaType> getContentType() {
+    if (!hasEntity())
+      return Optional.empty();
+    return getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
+        .map(Header::getValue).map(ModelHttpMediaType::fromString);
   }
 
   public ModelHttpRequestBuilder toBuilder() {
@@ -170,33 +110,8 @@ public class ModelHttpRequest implements AutoCloseable {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(entity, headers, method, url, version);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    ModelHttpRequest other = (ModelHttpRequest) obj;
-    return Objects.equals(entity, other.entity) && Objects.equals(headers, other.headers)
-        && Objects.equals(method, other.method) && Objects.equals(url, other.url)
-        && Objects.equals(version, other.version);
-  }
-
-  @Override
   public String toString() {
     return "ModelHttpRequest [version=" + version + ", method=" + method + ", url=" + url
-        + ", headers=" + headers + ", entity=" + entity + "]";
-  }
-
-  @Override
-  public void close() throws IOException {
-    if (getEntity().isPresent())
-      getEntity().get().close();
+        + ", headers=" + headers + "]";
   }
 }
