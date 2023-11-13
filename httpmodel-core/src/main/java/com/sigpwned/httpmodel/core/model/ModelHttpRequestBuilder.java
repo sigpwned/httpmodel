@@ -20,6 +20,7 @@
 package com.sigpwned.httpmodel.core.model;
 
 import java.util.Objects;
+import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
 /**
  * Models an HTTP request
@@ -35,7 +36,9 @@ public class ModelHttpRequestBuilder {
 
   private ModelHttpEntity entity;
 
-  public ModelHttpRequestBuilder() {}
+  public ModelHttpRequestBuilder() {
+    this.version = ModelHttpVersions.DEFAULT;
+  }
 
   public ModelHttpRequestBuilder(ModelHttpRequestBuilder that) {
     this.version = that.version;

@@ -29,7 +29,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
 import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
@@ -103,22 +102,12 @@ public final class ModelHttpURLConnections {
       }
     }
 
-    ModelHttpHeaders.Header contentTypeHeader =
-        headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
-            .findFirst().orElse(null);
-    ModelHttpHeaders.Header contentLengthHeader =
-        headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_LENGTH))
-            .findFirst().orElse(null);
-    ModelHttpHeaders.Header transferEncodingHeader =
-        headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.TRANSFER_ENCODING))
-            .findFirst().orElse(null);
-
     ModelHttpEntity entity;
-    if (contentTypeHeader != null || contentLengthHeader != null
-        || transferEncodingHeader != null) {
-      ModelHttpMediaType contentType = Optional.ofNullable(contentTypeHeader)
-          .map(ModelHttpHeaders.Header::getValue).map(ModelHttpMediaType::fromString)
-          .orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM);
+    if (ModelHttpEntities.responseEntityExists(cn.getRequestMethod(), statusCode)) {
+      ModelHttpMediaType contentType =
+          headers.stream().filter(h -> h.getName().equals(ModelHttpHeaderNames.CONTENT_TYPE))
+              .map(ModelHttpHeaders.Header::getValue).map(ModelHttpMediaType::fromString)
+              .findFirst().orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM);
 
       byte[] data;
       if (statusCode / 100 == 2) {

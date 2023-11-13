@@ -19,6 +19,7 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
@@ -27,9 +28,13 @@ import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 /**
  * Models an HTTP request
  */
-public class ModelHttpRequest {
+public class ModelHttpRequest implements AutoCloseable {
   public static ModelHttpRequestBuilder builder() {
     return new ModelHttpRequestBuilder();
+  }
+
+  public static ModelHttpRequest of(String method, ModelHttpUrl url, ModelHttpEntity entity) {
+    return of(ModelHttpVersions.DEFAULT, method, url, ModelHttpHeaders.of(), entity);
   }
 
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
@@ -37,14 +42,30 @@ public class ModelHttpRequest {
     return of(version, method, url, ModelHttpHeaders.of(), entity);
   }
 
+  public static ModelHttpRequest of(String method, ModelHttpUrl url, ModelHttpHeaders headers,
+      ModelHttpEntity entity) {
+    return new ModelHttpRequest(ModelHttpVersions.DEFAULT, method, url, headers, entity);
+  }
+
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
       ModelHttpHeaders headers, ModelHttpEntity entity) {
     return new ModelHttpRequest(version, method, url, headers, entity);
   }
 
+  public static ModelHttpRequest of(String method, ModelHttpUrl url,
+      Optional<ModelHttpEntity> entity) {
+    return of(ModelHttpVersions.DEFAULT, method, url, ModelHttpHeaders.of(), entity.orElse(null));
+  }
+
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
       Optional<ModelHttpEntity> entity) {
     return of(version, method, url, ModelHttpHeaders.of(), entity.orElse(null));
+  }
+
+  public static ModelHttpRequest of(String method, ModelHttpUrl url, ModelHttpHeaders headers,
+      Optional<ModelHttpEntity> entity) {
+    return new ModelHttpRequest(ModelHttpVersions.DEFAULT, method, url, headers,
+        entity.orElse(null));
   }
 
   public static ModelHttpRequest of(String version, String method, ModelHttpUrl url,
@@ -171,5 +192,11 @@ public class ModelHttpRequest {
   public String toString() {
     return "ModelHttpRequest [version=" + version + ", method=" + method + ", url=" + url
         + ", headers=" + headers + ", entity=" + entity + "]";
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (getEntity().isPresent())
+      getEntity().get().close();
   }
 }

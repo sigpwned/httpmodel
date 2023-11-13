@@ -19,6 +19,7 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
@@ -26,7 +27,7 @@ import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
 /**
  * Models an HTTP response
  */
-public class ModelHttpResponse {
+public class ModelHttpResponse implements AutoCloseable {
   public static ModelHttpResponseBuilder builder() {
     return new ModelHttpResponseBuilder();
   }
@@ -97,6 +98,12 @@ public class ModelHttpResponse {
 
   public ModelHttpResponse withEntity(ModelHttpEntity newEntity) {
     return toBuilder().entity(newEntity).build();
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (getEntity().isPresent())
+      getEntity().get().close();
   }
 
   public ModelHttpResponseBuilder toBuilder() {

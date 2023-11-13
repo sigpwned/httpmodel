@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
@@ -50,9 +51,9 @@ public class ModelHttpFormData implements Iterable<Entry> {
     /**
      * Parses a valid form entry. The name and value are automatically urldecoded. If the form entry
      * does not contain "=", then the value is considered absent.
-     * 
+     *
      * @throws IllegalArgumentException if the form entry is not valid
-     * 
+     *
      * @see ModelHttpEncodings#urldecode(String)
      * @see #toString()
      */
@@ -111,7 +112,7 @@ public class ModelHttpFormData implements Iterable<Entry> {
     /**
      * Converts this object into a valid form entry string. The name and value are automatically
      * urlencoded.
-     * 
+     *
      * @see ModelHttpEncodings#urlencode(String)
      * @see #fromString(String)
      */
@@ -126,16 +127,16 @@ public class ModelHttpFormData implements Iterable<Entry> {
 
   /**
    * Convenience method that converts the given entity to a string and then parses
-   * 
+   *
    * @see #fromString(String)
    */
-  public static ModelHttpFormData fromEntity(ModelHttpEntity entity) {
+  public static ModelHttpFormData fromEntity(ModelHttpEntity entity) throws IOException {
     return fromString(entity.toString(StandardCharsets.UTF_8));
   }
 
   /**
    * Parses a valid form string, e.g., alpha=bravo&amp;charlie=delta
-   * 
+   *
    * @throws IllegalArgumentException if the form string is not valid
    *
    * @see Entry#fromString(String)
@@ -200,7 +201,7 @@ public class ModelHttpFormData implements Iterable<Entry> {
 
   /**
    * Converts this object to a valid form string
-   * 
+   *
    * @see #fromString(String)
    */
   @Override

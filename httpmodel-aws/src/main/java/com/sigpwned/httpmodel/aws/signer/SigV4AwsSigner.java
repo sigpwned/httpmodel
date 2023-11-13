@@ -40,10 +40,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import com.sigpwned.aws.java.sdk.lite.core.util.Hexadecimal;
 import com.sigpwned.httpmodel.aws.AwsSigner;
 import com.sigpwned.httpmodel.aws.AwsSigningCredentials;
 import com.sigpwned.httpmodel.aws.AwsSigningCredentialsProvider;
-import com.sigpwned.httpmodel.aws.util.Hexadecimal;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 

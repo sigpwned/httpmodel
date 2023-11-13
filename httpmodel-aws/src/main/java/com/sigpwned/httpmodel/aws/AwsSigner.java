@@ -21,7 +21,7 @@ package com.sigpwned.httpmodel.aws;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import com.sigpwned.httpmodel.aws.util.AwsEndpoints;
+import com.sigpwned.aws.java.sdk.lite.core.util.AwsEndpoints;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 
 public interface AwsSigner {

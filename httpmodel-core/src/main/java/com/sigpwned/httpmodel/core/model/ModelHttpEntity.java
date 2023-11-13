@@ -20,11 +20,12 @@
 package com.sigpwned.httpmodel.core.model;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -40,7 +41,15 @@ import com.sigpwned.httpmodel.core.util.MoreCharStreams;
  * Note that this class buffers the entire entity in memory. As a result, it's important only to use
  * this class for modeling HTTP flows when the approximate size of the response is known.
  */
-public class ModelHttpEntity {
+public class ModelHttpEntity implements AutoCloseable {
+  @FunctionalInterface
+  public static interface EntityStreamProvider extends AutoCloseable {
+    public InputStream newInputStream() throws IOException;
+
+    @Override
+    default void close() throws IOException {}
+  }
+
   public static ModelHttpEntity ofPlainText(String text) {
     return of(ModelHttpMediaTypes.TEXT_PLAIN, text);
   }
@@ -53,19 +62,41 @@ public class ModelHttpEntity {
     return new ModelHttpEntity(type, data);
   }
 
-  private final ModelHttpMediaType type;
+  public static ModelHttpEntity of(ModelHttpMediaType type, File data) {
+    return of(type, data, false);
+  }
 
-  private final byte[] data;
+  public static ModelHttpEntity of(ModelHttpMediaType type, File data, boolean deleteOnClose) {
+    return new ModelHttpEntity(type, new EntityStreamProvider() {
+      @Override
+      public InputStream newInputStream() throws IOException {
+        return new FileInputStream(data);
+      }
+
+      @Override
+      public void close() throws IOException {
+        if (deleteOnClose)
+          data.delete();
+      }
+    });
+  }
+
+  private final ModelHttpMediaType type;
+  private final EntityStreamProvider streamProvider;
 
   public ModelHttpEntity(ModelHttpMediaType type, String data) {
     this(type.withCharset(StandardCharsets.UTF_8), data.getBytes(StandardCharsets.UTF_8));
   }
 
   public ModelHttpEntity(ModelHttpMediaType type, byte[] data) {
-    if (data == null)
+    this(type, () -> new ByteArrayInputStream(data));
+  }
+
+  public ModelHttpEntity(ModelHttpMediaType type, EntityStreamProvider streamProvider) {
+    if (streamProvider == null)
       throw new NullPointerException();
     this.type = type;
-    this.data = data;
+    this.streamProvider = streamProvider;
   }
 
   /**
@@ -75,42 +106,26 @@ public class ModelHttpEntity {
     return Optional.ofNullable(type);
   }
 
-  /**
-   * @return the data
-   */
-  private byte[] getData() {
-    return data;
+  public InputStream readBytes() throws IOException {
+    return getStreamProvider().newInputStream();
   }
 
-  public InputStream readBytes() {
-    return new ByteArrayInputStream(getData());
+  public byte[] toByteArray() throws IOException {
+    return MoreByteStreams.toByteArray(readBytes());
   }
 
-  public byte[] toByteArray() {
-    try {
-      return MoreByteStreams.toByteArray(readBytes());
-    } catch (IOException e) {
-      // This should never happen since it's all in memory
-      throw new UncheckedIOException(e);
-    }
-  }
-
-  public Reader readChars(Charset defaultCharset) {
+  public Reader readChars(Charset defaultCharset) throws IOException {
     return new InputStreamReader(readBytes(),
         getType().flatMap(ModelHttpMediaType::getCharset).orElse(defaultCharset));
   }
 
-  public String toString(Charset defaultCharset) {
-    try {
-      return MoreCharStreams.toString(readChars(defaultCharset));
-    } catch (IOException e) {
-      // Should never happen since this is all in memory
-      throw new UncheckedIOException(e);
-    }
+  public String toString(Charset defaultCharset) throws IOException {
+    return MoreCharStreams.toString(readChars(defaultCharset));
   }
 
-  public int length() {
-    return getData().length;
+  @Override
+  public void close() throws IOException {
+    getStreamProvider().close();
   }
 
   @Override
@@ -137,5 +152,9 @@ public class ModelHttpEntity {
   @Override
   public String toString() {
     return "ModelHttpEntity [type=" + type + ", data=" + Arrays.toString(data) + "]";
+  }
+
+  private EntityStreamProvider getStreamProvider() {
+    return streamProvider;
   }
 }
