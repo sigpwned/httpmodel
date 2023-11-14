@@ -6,21 +6,35 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Optional;
-import com.sigpwned.httpmodel.core.io.BufferableInputStream;
-import com.sigpwned.httpmodel.core.io.NullInputStream;
+import com.sigpwned.httpmodel.core.io.ByteFilterSource;
+import com.sigpwned.httpmodel.core.io.EntityInputStream;
+import com.sigpwned.httpmodel.core.io.buffered.NullInputStream;
 import com.sigpwned.httpmodel.core.util.MoreByteStreams;
 import com.sigpwned.httpmodel.core.util.MoreCharStreams;
 
-public abstract class ModelHttpEntityInputStream extends BufferableInputStream {
-  private final boolean hasEntity;
+public abstract class ModelHttpEntityInputStream extends EntityInputStream {
+  private boolean hasEntity;
 
-  public ModelHttpEntityInputStream(InputStream input) {
+  public ModelHttpEntityInputStream(InputStream input) throws IOException {
     super(Optional.ofNullable(input).orElseGet(NullInputStream::new));
-    this.hasEntity = (input != null);
+    hasEntity = (input != null);
   }
 
   public boolean hasEntity() {
     return hasEntity;
+  }
+
+  @Override
+  public void replace(InputStream newInput) throws IOException {
+    super.replace(Optional.ofNullable(newInput).orElseGet(NullInputStream::new));
+    hasEntity = (newInput != null);
+  }
+
+  @Override
+  protected void filter(ByteFilterSource filterSource) throws IOException {
+    if (!hasEntity())
+      throw new IllegalStateException("Cannot filter stream that represents no entity");
+    super.filter(filterSource);
   }
 
   public abstract Optional<ModelHttpMediaType> getContentType();

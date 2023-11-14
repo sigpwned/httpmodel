@@ -75,9 +75,9 @@ public class ModelHttpAuthority {
 
   public static final int MAX_PORT = 65535;
 
-  private final ModelHttpHost host;
+  private ModelHttpHost host;
 
-  private final Integer port;
+  private Integer port;
 
   public ModelHttpAuthority(ModelHttpHost host, Integer port) {
     if (host == null)
@@ -92,26 +92,22 @@ public class ModelHttpAuthority {
     this(that.host(), that.port());
   }
 
-  /**
-   * @return the host
-   */
   public ModelHttpHost getHost() {
     return host;
   }
 
-  public ModelHttpAuthority withHost(ModelHttpHost newHost) {
-    return toBuilder().host(newHost).build();
+  public ModelHttpAuthority setHost(ModelHttpHost host) {
+    this.host = host;
+    return this;
   }
 
-  /**
-   * @return the port
-   */
   public Integer getPort() {
     return port;
   }
 
-  public ModelHttpAuthority withPort(Integer newPort) {
-    return toBuilder().port(newPort).build();
+  public ModelHttpAuthority setPort(Integer port) {
+    this.port = port;
+    return this;
   }
 
   public ModelHttpAuthorityBuilder toBuilder() {

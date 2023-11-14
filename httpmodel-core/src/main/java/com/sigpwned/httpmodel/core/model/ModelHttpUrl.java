@@ -73,13 +73,13 @@ public class ModelHttpUrl {
   /**
    * @see ModelHttpSchemes
    */
-  private final String scheme;
+  private String scheme;
 
-  private final ModelHttpAuthority authority;
+  private ModelHttpAuthority authority;
 
-  private final String path;
+  private String path;
 
-  private final ModelHttpQueryString queryString;
+  private ModelHttpQueryString queryString;
 
   public ModelHttpUrl(String scheme, ModelHttpAuthority authority, String path,
       ModelHttpQueryString queryString) {
@@ -101,48 +101,40 @@ public class ModelHttpUrl {
     this(that.scheme(), that.authority(), that.path(), that.queryString());
   }
 
-  /**
-   * @return the scheme
-   */
   public String getScheme() {
     return scheme;
   }
 
-  public ModelHttpUrl withScheme(String newScheme) {
-    return toBuilder().scheme(newScheme).build();
+  public ModelHttpUrl setScheme(String scheme) {
+    this.scheme = scheme;
+    return this;
   }
 
-  /**
-   * @return the authority
-   */
   public ModelHttpAuthority getAuthority() {
     return authority;
   }
 
-  public ModelHttpUrl withAuthority(ModelHttpAuthority newAuthority) {
-    return toBuilder().authority(newAuthority).build();
+  public ModelHttpUrl setAuthority(ModelHttpAuthority authority) {
+    this.authority = authority;
+    return this;
   }
 
-  /**
-   * @return the path
-   */
   public String getPath() {
     return path;
   }
 
-  public ModelHttpUrl withPath(String newPath) {
-    return toBuilder().path(newPath).build();
+  public ModelHttpUrl setPath(String path) {
+    this.path = path;
+    return this;
   }
 
-  /**
-   * @return the parameters
-   */
-  public Optional<ModelHttpQueryString> getQueryString() {
-    return Optional.ofNullable(queryString);
+  public ModelHttpQueryString getQueryString() {
+    return queryString;
   }
 
-  public ModelHttpUrl withQueryString(ModelHttpQueryString newQueryString) {
-    return toBuilder().queryString(newQueryString).build();
+  public ModelHttpUrl setQueryString(ModelHttpQueryString queryString) {
+    this.queryString = queryString;
+    return this;
   }
 
   public ModelHttpUrlBuilder toBuilder() {
@@ -189,8 +181,8 @@ public class ModelHttpUrl {
   @Override
   public String toString() {
     String result = getScheme() + "://" + getAuthority() + getPath();
-    if (getQueryString().isPresent()) {
-      result = result + "?" + getQueryString().get().toString();
+    if (getQueryString() != null) {
+      result = result + "?" + getQueryString();
     }
     return result;
   }

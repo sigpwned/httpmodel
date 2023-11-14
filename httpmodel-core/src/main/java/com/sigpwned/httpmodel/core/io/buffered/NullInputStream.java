@@ -4,11 +4,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.OptionalLong;
 import com.sigpwned.httpmodel.core.io.BufferedInputStream;
-import com.sigpwned.httpmodel.core.io.NullInputStream;
 
-public class NullBufferedInputStream extends BufferedInputStream {
-  public NullBufferedInputStream() {
+public class NullInputStream extends BufferedInputStream {
+  public NullInputStream() {
     in = newInputStream();
+  }
+
+  @Override
+  public int read() throws IOException {
+    return -1;
+  }
+
+  @Override
+  public int read(byte[] b, int off, int len) throws IOException {
+    return -1;
+  }
+
+  @Override
+  public int read(byte[] b) throws IOException {
+    return -1;
   }
 
   @Override

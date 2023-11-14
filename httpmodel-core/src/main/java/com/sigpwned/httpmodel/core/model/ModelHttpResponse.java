@@ -19,8 +19,10 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+import com.sigpwned.httpmodel.core.io.ByteFilterSource;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
@@ -36,12 +38,11 @@ public class ModelHttpResponse extends ModelHttpEntityInputStream {
   /**
    * @see ModelHttpStatusCodes
    */
-  private final int statusCode;
+  private int statusCode;
 
-  private final ModelHttpHeaders headers;
+  private ModelHttpHeaders headers;
 
   public ModelHttpResponse(int statusCode, ModelHttpHeaders headers, InputStream entity) {
-    super(entity);
     if (headers == null)
       throw new NullPointerException();
     this.statusCode = statusCode;
@@ -52,18 +53,22 @@ public class ModelHttpResponse extends ModelHttpEntityInputStream {
     this(b.statusCode(), b.headers(), entity);
   }
 
-  /**
-   * @return the statusCode
-   */
   public int getStatusCode() {
     return statusCode;
   }
 
-  /**
-   * @return the headers
-   */
+  public ModelHttpResponse setStatusCode(int statusCode) {
+    this.statusCode = statusCode;
+    return this;
+  }
+
   public ModelHttpHeaders getHeaders() {
     return headers;
+  }
+
+  public ModelHttpResponse setHeaders(ModelHttpHeaders headers) {
+    this.headers = headers;
+    return this;
   }
 
   @Override
@@ -72,6 +77,11 @@ public class ModelHttpResponse extends ModelHttpEntityInputStream {
       return Optional.empty();
     return this.getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
         .map(Header::getValue).map(ModelHttpMediaType::fromString);
+  }
+
+  public ModelHttpResponse decode(ByteFilterSource filterSource) throws IOException {
+    filter(filterSource);
+    return this;
   }
 
   @Override

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,11 +47,11 @@ public class ModelHttpIpV4Host extends ModelHttpHost {
     return new ModelHttpIpV4Host(address);
   }
 
-  private final Inet4Address address;
+  private Inet4Address address;
 
   public ModelHttpIpV4Host(Inet4Address address) {
     super(Type.IPV4);
-    this.address = address;
+    setAddress(address);
   }
 
   /**
@@ -59,6 +59,13 @@ public class ModelHttpIpV4Host extends ModelHttpHost {
    */
   public Inet4Address getAddress() {
     return address;
+  }
+
+  public ModelHttpIpV4Host setAddress(Inet4Address address) {
+    if (address == null)
+      throw new NullPointerException();
+    this.address = address;
+    return this;
   }
 
   @Override

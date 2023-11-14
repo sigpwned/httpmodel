@@ -19,8 +19,10 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+import com.sigpwned.httpmodel.core.io.ByteFilterSource;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
@@ -37,16 +39,16 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
   /**
    * @see ModelHttpVersions
    */
-  private final String version;
+  private String version;
 
   /**
    * @see ModelHttpMethods
    */
-  private final String method;
+  private String method;
 
-  private final ModelHttpUrl url;
+  private ModelHttpUrl url;
 
-  private final ModelHttpHeaders headers;
+  private ModelHttpHeaders headers;
 
   public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
       InputStream entity) {
@@ -69,32 +71,40 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
     this(b.version(), b.method(), b.url(), b.headers(), entity);
   }
 
-  /**
-   * @return the version
-   */
   public String getVersion() {
     return version;
   }
 
-  /**
-   * @return the method
-   */
+  public ModelHttpRequest setVersion(String version) {
+    this.version = version;
+    return this;
+  }
+
   public String getMethod() {
     return method;
   }
 
-  /**
-   * @return the url
-   */
+  public ModelHttpRequest setMethod(String method) {
+    this.method = method;
+    return this;
+  }
+
   public ModelHttpUrl getUrl() {
     return url;
   }
 
-  /**
-   * @return the headers
-   */
+  public ModelHttpRequest setUrl(ModelHttpUrl url) {
+    this.url = url;
+    return this;
+  }
+
   public ModelHttpHeaders getHeaders() {
     return headers;
+  }
+
+  public ModelHttpRequest setHeaders(ModelHttpHeaders headers) {
+    this.headers = headers;
+    return this;
   }
 
   @Override
@@ -103,6 +113,10 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
       return Optional.empty();
     return getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
         .map(Header::getValue).map(ModelHttpMediaType::fromString);
+  }
+
+  public void encode(ByteFilterSource filterSource) throws IOException {
+    filter(filterSource);
   }
 
   public ModelHttpRequestBuilder toBuilder() {

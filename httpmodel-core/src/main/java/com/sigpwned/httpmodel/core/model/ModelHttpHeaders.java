@@ -19,15 +19,17 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
@@ -38,13 +40,8 @@ import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
  * @see ModelHttpHeaderNames
  */
 public class ModelHttpHeaders implements Iterable<Header> {
-  public static ModelHttpHeadersBuilder builder() {
-    return new ModelHttpHeadersBuilder();
-  }
-
   /**
-   * Models an HTTP header. Header names are lowercased automatically. Assumes all values are valid
-   * ISO-8859-1 characters.
+   * Models an HTTP header. Header names are lowercased automatically.
    */
   public static class Header {
     public static Header of(String name, String value) {
@@ -100,20 +97,16 @@ public class ModelHttpHeaders implements Iterable<Header> {
     }
   }
 
-  public static ModelHttpHeaders of(Header... headers) {
-    return new ModelHttpHeaders(asList(headers));
-  }
-
-  public static ModelHttpHeaders of(List<Header> headers) {
-    return new ModelHttpHeaders(headers);
-  }
-
   private final List<ModelHttpHeaders.Header> headers;
+
+  public ModelHttpHeaders() {
+    this(emptyList());
+  }
 
   public ModelHttpHeaders(List<Header> headers) {
     if (headers == null)
       throw new NullPointerException();
-    this.headers = headers.isEmpty() ? emptyList() : unmodifiableList(headers);
+    this.headers = new ArrayList<>(headers);
   }
 
   /* default */ ModelHttpHeaders(ModelHttpHeadersBuilder that) {
@@ -124,7 +117,7 @@ public class ModelHttpHeaders implements Iterable<Header> {
    * @return the headers
    */
   public List<Header> getHeaders() {
-    return headers;
+    return unmodifiableList(headers);
   }
 
   public Optional<Header> findFirstHeaderByName(String name) {
@@ -135,8 +128,78 @@ public class ModelHttpHeaders implements Iterable<Header> {
     return stream().filter(h -> h.getName().equalsIgnoreCase(name)).collect(toList());
   }
 
-  public ModelHttpHeadersBuilder toBuilder() {
-    return new ModelHttpHeadersBuilder(this);
+  public ModelHttpHeaders addHeaderFirst(String name, String value) {
+    return addHeaderFirst(new ModelHttpHeaders.Header(name, value));
+  }
+
+  public ModelHttpHeaders addHeaderFirst(ModelHttpHeaders.Header header) {
+    if (header == null)
+      throw new NullPointerException();
+    headers.add(0, header);
+    return this;
+  }
+
+  public ModelHttpHeaders addHeaderLast(String name, String value) {
+    return addHeaderLast(new ModelHttpHeaders.Header(name, value));
+  }
+
+  public ModelHttpHeaders addHeaderLast(ModelHttpHeaders.Header header) {
+    if (header == null)
+      throw new NullPointerException();
+    headers.add(headers.size(), header);
+    return this;
+  }
+
+  public ModelHttpHeaders removeFirstHeader(String name) {
+    removeHeaderMatching(h -> h.getName().equalsIgnoreCase(name), true);
+    return this;
+  }
+
+  public ModelHttpHeaders removeAllHeaders(String name) {
+    removeHeaderMatching(h -> h.getName().equalsIgnoreCase(name), false);
+    return this;
+  }
+
+  public ModelHttpHeaders setFirstHeader(String name, String value) {
+    removeFirstHeader(name);
+    if (value != null)
+      addHeaderFirst(name, value);
+    return this;
+  }
+
+  public ModelHttpHeaders setOnlyHeader(String name, String value) {
+    if (value != null)
+      return setAllHeaders(name, singletonList(value));
+    else
+      return removeAllHeaders(name);
+  }
+
+  public ModelHttpHeaders setAllHeaders(String name, List<String> values) {
+    removeAllHeaders(name);
+    if (values != null) {
+      for (String value : values)
+        addHeaderLast(name, value);
+    }
+    return this;
+  }
+
+  public void clear() {
+    headers.clear();
+  }
+
+  public boolean isEmpty() {
+    return headers.isEmpty();
+  }
+
+  private void removeHeaderMatching(Predicate<ModelHttpHeaders.Header> test, boolean firstOnly) {
+    Iterator<ModelHttpHeaders.Header> iterator = headers.iterator();
+    while (iterator.hasNext()) {
+      if (test.test(iterator.next())) {
+        iterator.remove();
+        if (firstOnly)
+          break;
+      }
+    }
   }
 
   @Override
@@ -167,6 +230,6 @@ public class ModelHttpHeaders implements Iterable<Header> {
   }
 
   public Stream<Header> stream() {
-    return getHeaders().stream();
+    return headers.stream();
   }
 }

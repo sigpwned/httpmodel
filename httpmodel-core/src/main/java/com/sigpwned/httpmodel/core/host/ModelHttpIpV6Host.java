@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ import com.sigpwned.httpmodel.core.org.apache.commons.validator.routines.InetAdd
 
 /**
  * Validation code is based on Apache Commons Validator InetAddressValidator class.
- * 
+ *
  * @see <a href=
  *      "https://github.com/apache/commons-validator/blob/master/src/main/java/org/apache/commons/validator/routines/InetAddressValidator.java">https://github.com/apache/commons-validator/blob/master/src/main/java/org/apache/commons/validator/routines/InetAddressValidator.java</a>
  */
@@ -55,11 +55,11 @@ public class ModelHttpIpV6Host extends ModelHttpHost {
     return new ModelHttpIpV6Host(address);
   }
 
-  private final Inet6Address address;
+  private Inet6Address address;
 
   public ModelHttpIpV6Host(Inet6Address address) {
     super(Type.IPV6);
-    this.address = address;
+    setAddress(address);
   }
 
   /**
@@ -67,6 +67,13 @@ public class ModelHttpIpV6Host extends ModelHttpHost {
    */
   public Inet6Address getAddress() {
     return address;
+  }
+
+  public ModelHttpIpV6Host setAddress(Inet6Address address) {
+    if (address == null)
+      throw new NullPointerException();
+    this.address = address;
+    return this;
   }
 
   @Override

@@ -32,9 +32,9 @@ public class ModelHttpRequestBuilder {
 
   private String method;
 
-  private ModelHttpUrl url;
+  private ModelHttpUrlBuilder url;
 
-  private ModelHttpHeaders headers;
+  private ModelHttpHeadersBuilder headers;
 
   public ModelHttpRequestBuilder() {
     this.version = ModelHttpVersions.DEFAULT;
@@ -50,8 +50,8 @@ public class ModelHttpRequestBuilder {
   public ModelHttpRequestBuilder(ModelHttpRequest that) {
     this.version = that.getVersion();
     this.method = that.getMethod();
-    this.url = that.getUrl();
-    this.headers = that.getHeaders();
+    this.url = new ModelHttpUrlBuilder(that.getUrl());
+    this.headers = new ModelHttpHeadersBuilder(that.getHeaders());
   }
 
   public String version() {
@@ -72,29 +72,19 @@ public class ModelHttpRequestBuilder {
     return this;
   }
 
-  public ModelHttpUrl url() {
+  public ModelHttpUrlBuilder url() {
     return url;
   }
 
-  public ModelHttpRequestBuilder url(ModelHttpUrl url) {
-    this.url = url;
-    return this;
-  }
-
-  public ModelHttpHeaders headers() {
+  public ModelHttpHeadersBuilder headers() {
     return headers;
-  }
-
-  public ModelHttpRequestBuilder headers(ModelHttpHeaders headers) {
-    this.headers = headers;
-    return this;
   }
 
   public ModelHttpRequest build(ModelHttpEntity entity) throws IOException {
     ModelHttpRequest result = null;
     ModelHttpEntityInputStream stream = entity.toEntityInputStream();
     try {
-      headers(headers().toBuilder().setOnlyHeader(ModelHttpHeaderNames.CONTENT_TYPE, null).build());
+      headers().setOnlyHeader(ModelHttpHeaderNames.CONTENT_TYPE, null);
       result = new ModelHttpRequest(this, stream);
     } finally {
       if (result == null)

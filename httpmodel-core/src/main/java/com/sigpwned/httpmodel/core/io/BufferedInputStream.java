@@ -11,6 +11,12 @@ public abstract class BufferedInputStream extends FilterInputStream {
     super(null);
   }
 
+  /**
+   * Re-starts this stream from its beginning. If the stream was previously closed, then it can now
+   * be read until it is closed again.
+   *
+   * @see #close()
+   */
   public void restart() throws IOException {
     InputStream newInputStream = newInputStream();
     if (newInputStream == null)

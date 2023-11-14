@@ -20,13 +20,17 @@
 package com.sigpwned.httpmodel.core.model;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import com.sigpwned.httpmodel.core.model.ModelHttpQueryString.Parameter;
@@ -153,10 +157,14 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
 
   private final List<Parameter> parameters;
 
+  public ModelHttpQueryString() {
+    this(emptyList());
+  }
+
   public ModelHttpQueryString(List<Parameter> parameters) {
     if (parameters == null)
       throw new NullPointerException();
-    this.parameters = unmodifiableList(parameters);
+    this.parameters = new ArrayList<>(parameters);
   }
 
   /* default */ ModelHttpQueryString(ModelHttpQueryStringBuilder that) {
@@ -167,7 +175,7 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
    * @return the entries
    */
   public List<Parameter> getParameters() {
-    return parameters;
+    return unmodifiableList(parameters);
   }
 
   public Optional<Parameter> findFirstParameterByName(String name) {
@@ -178,8 +186,83 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
     return stream().filter(p -> p.getName().equals(name)).collect(toList());
   }
 
-  public ModelHttpQueryStringBuilder toBuilder() {
-    return new ModelHttpQueryStringBuilder(this);
+  public ModelHttpQueryString addParameterFirst(String name, String value) {
+    return addParameterFirst(new ModelHttpQueryString.Parameter(name, value));
+  }
+
+  public ModelHttpQueryString addParameterFirst(ModelHttpQueryString.Parameter Parameter) {
+    if (Parameter == null)
+      throw new NullPointerException();
+    parameters.add(0, Parameter);
+    return this;
+  }
+
+  public ModelHttpQueryString addParameterLast(String name, String value) {
+    return addParameterLast(new ModelHttpQueryString.Parameter(name, value));
+  }
+
+  public ModelHttpQueryString addParameterLast(ModelHttpQueryString.Parameter Parameter) {
+    if (Parameter == null)
+      throw new NullPointerException();
+    parameters.add(parameters.size(), Parameter);
+    return this;
+  }
+
+  public ModelHttpQueryString removeFirstParameter(String name) {
+    removeParameterMatching(h -> h.getName().equalsIgnoreCase(name), true);
+    return this;
+  }
+
+  public ModelHttpQueryString removeAllParameters(String name) {
+    removeParameterMatching(h -> h.getName().equalsIgnoreCase(name), false);
+    return this;
+  }
+
+  public ModelHttpQueryString setFirstParameter(String name, String value) {
+    removeFirstParameter(name);
+    if (value != null)
+      addParameterFirst(name, value);
+    return this;
+  }
+
+  public ModelHttpQueryString setOnlyParameter(String name, String value) {
+    if (value != null)
+      return setAllParameters(name, singletonList(value));
+    else
+      return removeAllParameters(name);
+  }
+
+  public ModelHttpQueryString setAllParameters(String name, List<String> values) {
+    removeAllParameters(name);
+    if (values != null) {
+      for (String value : values)
+        addParameterLast(name, value);
+    }
+    return this;
+  }
+
+  public void clear() {
+    parameters.clear();
+  }
+
+  public boolean isEmpty() {
+    return parameters.isEmpty();
+  }
+
+  private void removeParameterMatching(Predicate<ModelHttpQueryString.Parameter> test,
+      boolean firstOnly) {
+    Iterator<ModelHttpQueryString.Parameter> iterator = parameters.iterator();
+    while (iterator.hasNext()) {
+      if (test.test(iterator.next())) {
+        iterator.remove();
+        if (firstOnly)
+          break;
+      }
+    }
+  }
+
+  public List<ModelHttpQueryString.Parameter> parameters() {
+    return unmodifiableList(parameters);
   }
 
   @Override
