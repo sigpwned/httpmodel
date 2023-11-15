@@ -91,7 +91,7 @@ public final class ModelHttpServlets {
       entity = null;
     }
 
-    return new ModelHttpRequest(version, method, url, ModelHttpHeaders.of(headers), entity);
+    return new ModelHttpRequest(version, method, url, new ModelHttpHeaders(headers), entity);
   }
 
   /**

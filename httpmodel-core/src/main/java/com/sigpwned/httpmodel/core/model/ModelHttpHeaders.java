@@ -103,6 +103,10 @@ public class ModelHttpHeaders implements Iterable<Header> {
     this(emptyList());
   }
 
+  public ModelHttpHeaders(ModelHttpHeaders that) {
+    this(that.getHeaders());
+  }
+
   public ModelHttpHeaders(List<Header> headers) {
     if (headers == null)
       throw new NullPointerException();

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,7 +57,7 @@ public class ModelHttpServletsTest {
 
     ModelHttpRequest request = ModelHttpServlets.fromRequest(req);
 
-    assertThat(request, is(ModelHttpRequest.of(ModelHttpVersions.HTTP_1_1, ModelHttpMethods.GET,
+    assertThat(request, is(new ModelHttpRequest(ModelHttpVersions.HTTP_1_1, ModelHttpMethods.GET,
         ModelHttpUrl.fromString("http://localhost:8080/path/to/example"), Optional.empty())));
   }
 
@@ -66,7 +66,7 @@ public class ModelHttpServletsTest {
     byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
 
     ModelHttpResponse response = ModelHttpResponse.of(ModelHttpStatusCodes.OK,
-        ModelHttpEntity.of(ModelHttpMediaTypes.TEXT_PLAIN, bytes));
+        new ModelHttpEntity(ModelHttpMediaTypes.TEXT_PLAIN, bytes));
 
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
 

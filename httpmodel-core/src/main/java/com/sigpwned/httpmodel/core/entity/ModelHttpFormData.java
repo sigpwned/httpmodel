@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import com.sigpwned.httpmodel.core.entity.ModelHttpFormData.Entry;
+import com.sigpwned.httpmodel.core.io.EntityInputStream;
 import com.sigpwned.httpmodel.core.io.buffered.MemoryBufferedInputStream;
 import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
 import com.sigpwned.httpmodel.core.model.ModelHttpEntityInputStream;
@@ -43,6 +44,9 @@ import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
  * Models an HTTP entity of type application/x-www-form-urlencoded.
  */
 public class ModelHttpFormData extends ModelHttpEntity implements Iterable<Entry> {
+  public static final ModelHttpMediaType CONTENT_TYPE =
+      ModelHttpMediaTypes.APPLICATION_X_WWW_FORM_URLENCODED;
+
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
   private static final Pattern EQUALS = Pattern.compile("=");
@@ -199,14 +203,8 @@ public class ModelHttpFormData extends ModelHttpEntity implements Iterable<Entry
   }
 
   @Override
-  public ModelHttpEntityInputStream toEntityInputStream() {
-    return new ModelHttpEntityInputStream(
-        new MemoryBufferedInputStream(toString(), StandardCharsets.UTF_8)) {
-      @Override
-      public Optional<ModelHttpMediaType> getContentType() {
-        return Optional.of(ModelHttpMediaTypes.APPLICATION_X_WWW_FORM_URLENCODED);
-      }
-    };
+  public EntityInputStream toEntityInputStream() {
+    return new EntityInputStream(new MemoryBufferedInputStream(toString(), StandardCharsets.UTF_8));
   }
 
   /**

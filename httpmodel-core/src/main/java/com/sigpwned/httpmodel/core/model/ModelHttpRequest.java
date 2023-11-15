@@ -51,7 +51,7 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
   private ModelHttpHeaders headers;
 
   public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
-      InputStream entity) {
+      InputStream entity) throws IOException {
     super(entity);
     if (version == null)
       throw new NullPointerException();
@@ -67,15 +67,13 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
     this.headers = headers;
   }
 
-  /* default */ ModelHttpRequest(ModelHttpRequestBuilder b, InputStream entity) {
-    this(b.version(), b.method(), b.url(), b.headers(), entity);
-  }
-
   public String getVersion() {
     return version;
   }
 
   public ModelHttpRequest setVersion(String version) {
+    if (version == null)
+      throw new NullPointerException();
     this.version = version;
     return this;
   }
@@ -85,6 +83,8 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
   }
 
   public ModelHttpRequest setMethod(String method) {
+    if (method == null)
+      throw new NullPointerException();
     this.method = method;
     return this;
   }
@@ -94,6 +94,8 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
   }
 
   public ModelHttpRequest setUrl(ModelHttpUrl url) {
+    if (url == null)
+      throw new NullPointerException();
     this.url = url;
     return this;
   }
@@ -103,6 +105,8 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
   }
 
   public ModelHttpRequest setHeaders(ModelHttpHeaders headers) {
+    if (headers == null)
+      throw new NullPointerException();
     this.headers = headers;
     return this;
   }
@@ -117,10 +121,6 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
 
   public void encode(ByteFilterSource filterSource) throws IOException {
     filter(filterSource);
-  }
-
-  public ModelHttpRequestBuilder toBuilder() {
-    return new ModelHttpRequestBuilder(this);
   }
 
   @Override

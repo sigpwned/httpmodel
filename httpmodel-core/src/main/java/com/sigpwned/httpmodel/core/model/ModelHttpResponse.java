@@ -42,7 +42,9 @@ public class ModelHttpResponse extends ModelHttpEntityInputStream {
 
   private ModelHttpHeaders headers;
 
-  public ModelHttpResponse(int statusCode, ModelHttpHeaders headers, InputStream entity) {
+  public ModelHttpResponse(int statusCode, ModelHttpHeaders headers, InputStream entity)
+      throws IOException {
+    super(entity);
     if (headers == null)
       throw new NullPointerException();
     this.statusCode = statusCode;

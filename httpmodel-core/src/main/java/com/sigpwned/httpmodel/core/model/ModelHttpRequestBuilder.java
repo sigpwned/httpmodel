@@ -21,7 +21,7 @@ package com.sigpwned.httpmodel.core.model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
+import java.util.Optional;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
 /**
@@ -32,26 +32,19 @@ public class ModelHttpRequestBuilder {
 
   private String method;
 
-  private ModelHttpUrlBuilder url;
+  private ModelHttpRequestUrlBuilder url;
 
-  private ModelHttpHeadersBuilder headers;
+  private ModelHttpRequestHeadersBuilder headers;
 
   public ModelHttpRequestBuilder() {
     this.version = ModelHttpVersions.DEFAULT;
   }
 
   public ModelHttpRequestBuilder(ModelHttpRequestBuilder that) {
-    this.version = that.version;
+    this.version = Optional.ofNullable(that.version).orElse(ModelHttpVersions.DEFAULT);
     this.method = that.method;
-    this.url = that.url;
-    this.headers = that.headers;
-  }
-
-  public ModelHttpRequestBuilder(ModelHttpRequest that) {
-    this.version = that.getVersion();
-    this.method = that.getMethod();
-    this.url = new ModelHttpUrlBuilder(that.getUrl());
-    this.headers = new ModelHttpHeadersBuilder(that.getHeaders());
+    this.url = new ModelHttpRequestUrlBuilder(this, that.url());
+    this.headers = new ModelHttpRequestHeadersBuilder(this, that.headers());
   }
 
   public String version() {
@@ -72,28 +65,15 @@ public class ModelHttpRequestBuilder {
     return this;
   }
 
-  public ModelHttpUrlBuilder url() {
+  public ModelHttpRequestUrlBuilder url() {
     return url;
   }
 
-  public ModelHttpHeadersBuilder headers() {
+  public ModelHttpRequestHeadersBuilder headers() {
     return headers;
   }
 
-  public ModelHttpRequest build(ModelHttpEntity entity) throws IOException {
-    ModelHttpRequest result = null;
-    ModelHttpEntityInputStream stream = entity.toEntityInputStream();
-    try {
-      headers().setOnlyHeader(ModelHttpHeaderNames.CONTENT_TYPE, null);
-      result = new ModelHttpRequest(this, stream);
-    } finally {
-      if (result == null)
-        stream.close();
-    }
-    return result;
-  }
-
-  public ModelHttpRequest build(InputStream entity) {
-    return new ModelHttpRequest(this, entity);
+  public ModelHttpRequest build(InputStream entity) throws IOException {
+    return new ModelHttpRequest(version(), method(), url().build(), headers().build(), entity);
   }
 }

@@ -98,7 +98,7 @@ public class ModelHttpUrl {
   }
 
   public ModelHttpUrl(ModelHttpUrlBuilder that) {
-    this(that.scheme(), that.authority(), that.path(), that.queryString());
+    this(that.scheme(), that.authority(), that.path(), that.queryString().build());
   }
 
   public String getScheme() {

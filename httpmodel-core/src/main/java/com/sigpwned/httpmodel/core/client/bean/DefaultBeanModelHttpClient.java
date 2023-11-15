@@ -12,6 +12,7 @@ import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequestBuilder;
+import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
@@ -60,7 +61,7 @@ public class DefaultBeanModelHttpClient implements BeanModelHttpClient {
       requestMapper.mapRequest(httpRequestBuilder, request);
     }
 
-    try (ModelHttpRequest rawHttpRequest = httpRequestBuilder.build();
+    try (ModelHttpRequest rawHttpRequest = httpRequestBuilder.build(null);
         ModelHttpRequest filteredHttpRequest = filterRequest(rawHttpRequest);
         ModelHttpResponse rawHttpResponse = getClient().send(filteredHttpRequest);
         ModelHttpResponse filteredHttpResponse = filterResponse(rawHttpResponse)) {
@@ -96,7 +97,7 @@ public class DefaultBeanModelHttpClient implements BeanModelHttpClient {
   /**
    * hook
    */
-  protected ModelHttpRequest filterRequest(ModelHttpRequest request) {
+  protected ModelHttpRequest filterRequest(ModelHttpRequestHead request) {
     return request;
   }
 

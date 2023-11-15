@@ -261,10 +261,6 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
     }
   }
 
-  public List<ModelHttpQueryString.Parameter> parameters() {
-    return unmodifiableList(parameters);
-  }
-
   @Override
   public int hashCode() {
     return Objects.hash(parameters);
@@ -290,6 +286,10 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
   @Override
   public String toString() {
     return stream().map(Parameter::toString).collect(joining("&"));
+  }
+
+  public ModelHttpQueryStringBuilder toBuilder() {
+    return new ModelHttpQueryStringBuilder(this);
   }
 
   @Override
