@@ -1,50 +1,48 @@
 package com.sigpwned.httpmodel.core.client.bean;
 
-import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.BeanModelHttpClient;
-import com.sigpwned.httpmodel.core.ModelHttpClient;
+import com.sigpwned.httpmodel.core.client.DefaultModelHttpClientBase;
+import com.sigpwned.httpmodel.core.client.ModelHttpConnector;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
-import com.sigpwned.httpmodel.core.model.ModelHttpRequestBuilder;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
+import com.sigpwned.httpmodel.core.model.ModelHttpResponseHead;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
-import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
 
-public class DefaultBeanModelHttpClient implements BeanModelHttpClient {
-  private final ModelHttpClient client;
-  private final List<RequestMapper<?>> requestMappers;
-  private final List<ResponseMapper<?>> responseMappers;
-  private final List<ExceptionMapper> exceptionMappers;
+public class DefaultBeanModelHttpClient extends DefaultModelHttpClientBase
+    implements BeanModelHttpClient {
+  private final List<ModelHttpClientRequestMapper<?>> requestMappers;
+  private final List<ModelHttpClientResponseMapper<?>> responseMappers;
+  private final List<ModelHttpClientExceptionMapper> exceptionMappers;
 
-  public DefaultBeanModelHttpClient(ModelHttpClient client) {
-    this.client = requireNonNull(client);
+  public DefaultBeanModelHttpClient(ModelHttpConnector connector) {
+    super(connector);
     this.requestMappers = new ArrayList<>();
     this.responseMappers = new ArrayList<>();
     this.exceptionMappers = new ArrayList<>();
   }
 
-  public void registerRequestMapper(RequestMapper<?> requestMapper) {
+  public void registerRequestMapper(ModelHttpClientRequestMapper<?> requestMapper) {
     // TODO Mapper order?
     if (requestMapper == null)
       throw new NullPointerException();
     requestMappers.add(requestMapper);
   }
 
-  public void registerResponseMapper(ResponseMapper<?> responseMapper) {
+  public void registerResponseMapper(ModelHttpClientResponseMapper<?> responseMapper) {
     // TODO Mapper order?
     if (responseMapper == null)
       throw new NullPointerException();
     responseMappers.add(responseMapper);
   }
 
-  public void registerExceptionMapper(ExceptionMapper exceptionMapper) {
+  public void registerExceptionMapper(ModelHttpClientExceptionMapper exceptionMapper) {
     // TODO Mapper order?
     if (exceptionMapper == null)
       throw new NullPointerException();
@@ -52,93 +50,124 @@ public class DefaultBeanModelHttpClient implements BeanModelHttpClient {
   }
 
   @Override
-  public <RequestT, ResponseT> ResponseT send(ModelHttpRequestBuilder httpRequestBuilder,
+  public <RequestT, ResponseT> ResponseT send(ModelHttpRequestHead httpRequestHead,
       RequestT request, Class<ResponseT> responseType) throws IOException {
-    if (request != null) {
-      // TODO What if there is no mapper?
-      Optional<RequestMapper<RequestT>> maybeRequestMapper = findRequestMapperForRequest(request);
-      RequestMapper<RequestT> requestMapper = maybeRequestMapper.get();
-      requestMapper.mapRequest(httpRequestBuilder, request);
+    doRequestFilters(httpRequestHead);
+
+    ModelHttpResponse httpResponse;
+    try (ModelHttpRequest httpRequest = doMapRequest(httpRequestHead, request)) {
+      httpRequestHead = ModelHttpRequestHead.fromRequest(httpRequest);
+
+      doRequestInterceptors(httpRequest);
+
+      httpResponse = doSend(httpRequest);
     }
 
-    try (ModelHttpRequest rawHttpRequest = httpRequestBuilder.build(null);
-        ModelHttpRequest filteredHttpRequest = filterRequest(rawHttpRequest);
-        ModelHttpResponse rawHttpResponse = getClient().send(filteredHttpRequest);
-        ModelHttpResponse filteredHttpResponse = filterResponse(rawHttpResponse)) {
+    Optional<ResponseT> maybeResponse = null;
+    try {
+      ModelHttpResponseHead httpResponseHead =
+          new ModelHttpResponseHead(httpResponse.getStatusCode(), httpResponse.getHeaders());
 
-      IOException mappedException =
-          getExceptionMappers().stream().map(m -> m.mapException(filteredHttpResponse))
-              .filter(Objects::nonNull).findFirst().orElse(null);
-      if (mappedException != null)
-        throw mappedException;
+      doResponseFilters(httpResponseHead);
 
-      if (!filteredHttpResponse.hasEntity())
-        return null;
+      doResponseInterceptors(httpResponse);
 
-      ModelHttpMediaType responseMediaType = filteredHttpResponse.getHeaders()
-          .findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE).map(Header::getValue)
-          .map(ModelHttpMediaType::fromString).orElse(ModelHttpMediaTypes.APPLICATION_OCTET_STREAM);
+      IOException problem = doMapException(httpRequestHead, httpResponse);
+      if (problem != null)
+        throw problem;
 
-      // TODO What if there is no mapper?
-      Optional<ResponseMapper<ResponseT>> maybeResponseMapper =
-          findResponseMapperForResponseType(responseType, responseMediaType);
-      ResponseMapper<ResponseT> responseMapper = maybeResponseMapper.get();
-      ResponseT response = responseMapper.mapResponse(filteredHttpRequest, filteredHttpResponse);
-
-      return response;
+      maybeResponse =
+          Optional.ofNullable(doMapResponse(httpRequestHead, httpResponse, responseType));
+    } finally {
+      if (maybeResponse == null)
+        httpResponse.close();
     }
-  }
 
-  @Override
-  public void close() throws IOException {
-    getClient().close();
+    return maybeResponse.orElse(null);
   }
 
   /**
    * hook
    */
-  protected ModelHttpRequest filterRequest(ModelHttpRequestHead request) {
-    return request;
+  protected <RequestT> ModelHttpRequest doMapRequest(ModelHttpRequestHead requestHead,
+      RequestT request) throws IOException {
+    if (request == null)
+      return new ModelHttpRequest(requestHead, null);
+    // TODO What if there is no mapper?
+    ModelHttpMediaType contentType =
+        requestHead.getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
+            .map(Header::getValue).map(ModelHttpMediaType::fromString).orElse(null);
+    Optional<ModelHttpClientRequestMapper<RequestT>> maybeRequestMapper =
+        findRequestMapperForRequest(request, contentType);
+    ModelHttpClientRequestMapper<RequestT> requestMapper = maybeRequestMapper.get();
+    return requestMapper.mapRequest(requestHead, request);
   }
 
   /**
    * hook
    */
-  protected ModelHttpResponse filterResponse(ModelHttpResponse response) {
-    return response;
+  protected IOException doMapException(ModelHttpRequestHead httpRequestHead,
+      ModelHttpResponse httpResponseHead) {
+    for (ModelHttpClientExceptionMapper exceptionMapper : getExceptionMappers()) {
+      IOException problem = exceptionMapper.mapException(httpRequestHead, httpResponseHead);
+      if (problem != null)
+        return problem;
+    }
+    return null;
+  }
+
+  /**
+   * hook
+   */
+  protected <ResponseT> ResponseT doMapResponse(ModelHttpRequestHead httpRequestHead,
+      ModelHttpResponse httpResponse, Class<ResponseT> responseType) throws IOException {
+    // TODO What if there is no mapper?
+    ModelHttpMediaType contentType =
+        httpResponse.getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
+            .map(Header::getValue).map(ModelHttpMediaType::fromString).orElse(null);
+    Optional<ModelHttpClientResponseMapper<ResponseT>> maybeResponseMapper =
+        findResponseMapperForResponseType(responseType, contentType);
+    ModelHttpClientResponseMapper<ResponseT> responseMapper = maybeResponseMapper.get();
+    return responseMapper.mapResponse(httpRequestHead, httpResponse);
+  }
+
+  /**
+   * hook
+   *
+   * @throws IOException
+   */
+  protected ModelHttpResponse doSend(ModelHttpRequest request) throws IOException {
+    return getConnector().send(request);
   }
 
   @SuppressWarnings("unchecked")
-  protected <T> Optional<RequestMapper<T>> findRequestMapperForRequest(T request) {
+  protected <T> Optional<ModelHttpClientRequestMapper<T>> findRequestMapperForRequest(T request,
+      ModelHttpMediaType contentType) {
     if (request == null)
       throw new NullPointerException();
     Class<T> requestType = (Class<T>) request.getClass();
-    return getRequestMappers().stream().filter(m -> m.isMappable(requestType))
-        .map(m -> (RequestMapper<T>) m).findFirst();
+    return getRequestMappers().stream().filter(m -> m.isMappable(requestType, contentType))
+        .map(m -> (ModelHttpClientRequestMapper<T>) m).findFirst();
   }
 
   @SuppressWarnings("unchecked")
-  protected <T> Optional<ResponseMapper<T>> findResponseMapperForResponseType(Class<T> responseType,
-      ModelHttpMediaType contentType) {
+  protected <T> Optional<ModelHttpClientResponseMapper<T>> findResponseMapperForResponseType(
+      Class<T> responseType, ModelHttpMediaType contentType) {
     if (responseType == null)
       throw new NullPointerException();
     return getResponseMappers().stream().filter(m -> m.isMappable(responseType, contentType))
-        .map(m -> (ResponseMapper<T>) m).findFirst();
+        .map(m -> (ModelHttpClientResponseMapper<T>) m).findFirst();
   }
 
-  private ModelHttpClient getClient() {
-    return client;
-  }
-
-  private List<RequestMapper<?>> getRequestMappers() {
+  private List<ModelHttpClientRequestMapper<?>> getRequestMappers() {
     return requestMappers;
   }
 
-  private List<ResponseMapper<?>> getResponseMappers() {
+  private List<ModelHttpClientResponseMapper<?>> getResponseMappers() {
     return responseMappers;
   }
 
-  private List<ExceptionMapper> getExceptionMappers() {
+  private List<ModelHttpClientExceptionMapper> getExceptionMappers() {
     return exceptionMappers;
   }
 }

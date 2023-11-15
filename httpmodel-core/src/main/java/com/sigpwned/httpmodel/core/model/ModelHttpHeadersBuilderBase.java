@@ -111,6 +111,14 @@ public abstract class ModelHttpHeadersBuilderBase<BuilderT extends ModelHttpHead
     return unmodifiableList(building.getHeaders());
   }
 
+  @SuppressWarnings("unchecked")
+  public BuilderT assign(ModelHttpHeaders value) {
+    building.clear();
+    for (Header header : value)
+      building.addHeaderLast(header);
+    return (BuilderT) this;
+  }
+
   protected ModelHttpHeaders build() {
     return building;
   }

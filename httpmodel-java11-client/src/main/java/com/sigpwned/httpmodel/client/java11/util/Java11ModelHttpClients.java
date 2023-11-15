@@ -94,8 +94,11 @@ public final class Java11ModelHttpClients {
 
   /**
    * Converts an {@link HttpResponse} to a {@link ModelHttpResponse}.
+   *
+   * @throws IOException
    */
-  public static ModelHttpResponse fromResponse(HttpResponse<InputStream> response) {
+  public static ModelHttpResponse fromResponse(HttpResponse<InputStream> response)
+      throws IOException {
     int statusCode = response.statusCode();
 
     List<ModelHttpHeaders.Header> headers = new ArrayList<>();
@@ -125,6 +128,6 @@ public final class Java11ModelHttpClients {
       entity = null;
     }
 
-    return new ModelHttpResponse(statusCode, ModelHttpHeaders.of(headers), entity);
+    return new ModelHttpResponse(statusCode, new ModelHttpHeaders(headers), entity);
   }
 }

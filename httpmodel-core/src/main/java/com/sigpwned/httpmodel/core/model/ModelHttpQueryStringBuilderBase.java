@@ -97,6 +97,14 @@ public abstract class ModelHttpQueryStringBuilderBase<BuilderT extends ModelHttp
     return (BuilderT) this;
   }
 
+  @SuppressWarnings("unchecked")
+  public BuilderT assign(ModelHttpQueryString value) {
+    building.clear();
+    for (Parameter parameter : value)
+      building.addParameterLast(parameter);
+    return (BuilderT) this;
+  }
+
   public void clear() {
     building.clear();
   }

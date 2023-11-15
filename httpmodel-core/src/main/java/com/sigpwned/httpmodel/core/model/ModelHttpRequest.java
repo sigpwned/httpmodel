@@ -50,6 +50,14 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
 
   private ModelHttpHeaders headers;
 
+  public ModelHttpRequest(ModelHttpRequestHead head) throws IOException {
+    this(head, null);
+  }
+
+  public ModelHttpRequest(ModelHttpRequestHead head, InputStream entity) throws IOException {
+    this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(), entity);
+  }
+
   public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
       InputStream entity) throws IOException {
     super(entity);

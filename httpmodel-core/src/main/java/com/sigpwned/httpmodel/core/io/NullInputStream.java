@@ -1,9 +1,8 @@
-package com.sigpwned.httpmodel.core.io.buffered;
+package com.sigpwned.httpmodel.core.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.OptionalLong;
-import com.sigpwned.httpmodel.core.io.BufferedInputStream;
 
 public class NullInputStream extends BufferedInputStream {
   public NullInputStream() {
@@ -32,11 +31,7 @@ public class NullInputStream extends BufferedInputStream {
 
   @Override
   public void close() throws IOException {
-    try {
-      super.close();
-    } finally {
-      // No cleanup to do
-    }
+    // meh
   }
 
   /**
@@ -44,6 +39,6 @@ public class NullInputStream extends BufferedInputStream {
    */
   @Override
   protected InputStream newInputStream() {
-    return new NullInputStream();
+    return this;
   }
 }

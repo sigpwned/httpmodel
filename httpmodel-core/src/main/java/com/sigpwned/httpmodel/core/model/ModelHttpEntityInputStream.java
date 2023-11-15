@@ -11,7 +11,7 @@ import java.util.OptionalLong;
 import com.sigpwned.httpmodel.core.io.ByteFilterSource;
 import com.sigpwned.httpmodel.core.io.EntityInputStream;
 import com.sigpwned.httpmodel.core.io.InputStreamBufferingStrategy;
-import com.sigpwned.httpmodel.core.io.buffered.NullInputStream;
+import com.sigpwned.httpmodel.core.io.NullInputStream;
 import com.sigpwned.httpmodel.core.util.MoreByteStreams;
 import com.sigpwned.httpmodel.core.util.MoreCharStreams;
 
@@ -110,7 +110,7 @@ public abstract class ModelHttpEntityInputStream extends FilterInputStream {
     return MoreCharStreams.toString(readChars(defaultCharset));
   }
 
-  protected ModelHttpEntityInputStream getDelegate() {
-    return (ModelHttpEntityInputStream) in;
+  protected FriendlyEntityInputStream getDelegate() {
+    return (FriendlyEntityInputStream) in;
   }
 }

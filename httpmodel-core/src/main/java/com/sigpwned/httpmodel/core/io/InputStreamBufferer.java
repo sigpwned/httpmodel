@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import com.sigpwned.httpmodel.core.io.buffered.FileBufferedInputStream;
 import com.sigpwned.httpmodel.core.io.buffered.MemoryBufferedInputStream;
-import com.sigpwned.httpmodel.core.io.buffered.NullInputStream;
 import com.sigpwned.httpmodel.core.util.MoreByteStreams;
 
 @FunctionalInterface

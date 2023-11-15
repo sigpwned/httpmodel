@@ -105,6 +105,29 @@ public abstract class ModelHttpUrlBuilderBase<QueryStringBuilderT extends ModelH
     return queryString;
   }
 
+  @SuppressWarnings("unchecked")
+  public BuilderT queryString(QueryStringBuilderT queryString) {
+    this.queryString = queryString;
+    return (BuilderT) this;
+  }
+
+  @SuppressWarnings("unchecked")
+  public BuilderT queryString(ModelHttpQueryString newQueryString) {
+    if (queryString == null)
+      queryString = newQueryStringBuilder();
+    queryString.assign(newQueryString);
+    return (BuilderT) this;
+  }
+
+  @SuppressWarnings("unchecked")
+  public BuilderT assign(ModelHttpUrl url) {
+    scheme(url.getScheme());
+    authority(url.getAuthority());
+    path(url.getPath());
+    queryString(newQueryStringBuilder().assign(url.getQueryString()));
+    return (BuilderT) this;
+  }
+
   protected ModelHttpUrl build() {
     return new ModelHttpUrl(scheme(), authority(), path(), queryString().build());
   }

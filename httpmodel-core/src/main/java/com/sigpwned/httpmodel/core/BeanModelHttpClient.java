@@ -20,19 +20,19 @@
 package com.sigpwned.httpmodel.core;
 
 import java.io.IOException;
-import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
-import com.sigpwned.httpmodel.core.model.ModelHttpRequestBuilder;
+import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpUrl;
 
 public interface BeanModelHttpClient extends AutoCloseable {
 
-  default <RequestT, ResponseT> ResponseT send(ModelHttpUrl url, String method, RequestT request,
+  default <RequestT, ResponseT> ResponseT send(String method, ModelHttpUrl url, RequestT request,
       Class<ResponseT> responseType) throws IOException {
-    return send(ModelHttpRequest.builder().url(url).method(method), request, responseType);
+    return send(ModelHttpRequestHead.builder().url(url).method(method).build(), request,
+        responseType);
   }
 
-  public <RequestT, ResponseT> ResponseT send(ModelHttpRequestBuilder httpRequestBuilder,
-      RequestT request, Class<ResponseT> responseType) throws IOException;
+  public <RequestT, ResponseT> ResponseT send(ModelHttpRequestHead requestHead, RequestT request,
+      Class<ResponseT> responseType) throws IOException;
 
   @Override
   public void close() throws IOException;

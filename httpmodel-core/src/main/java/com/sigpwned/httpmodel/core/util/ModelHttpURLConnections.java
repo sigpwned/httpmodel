@@ -109,6 +109,6 @@ public final class ModelHttpURLConnections {
       entity = null;
     }
 
-    return new ModelHttpResponse(statusCode, ModelHttpHeaders.of(headers), entity);
+    return new ModelHttpResponse(statusCode, new ModelHttpHeaders(headers), entity);
   }
 }

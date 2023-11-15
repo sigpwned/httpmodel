@@ -27,11 +27,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import com.sigpwned.httpmodel.client.java11.util.Java11ModelHttpClients;
-import com.sigpwned.httpmodel.core.ModelHttpClient;
+import com.sigpwned.httpmodel.core.client.ModelHttpConnector;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 
-public class Java11ModelHttpClient implements ModelHttpClient {
+public class Java11ModelHttpClient implements ModelHttpConnector {
   public static HttpClient defaultHttpClient() {
     return HttpClient.newHttpClient();
   }
@@ -72,7 +72,11 @@ public class Java11ModelHttpClient implements ModelHttpClient {
     return Java11ModelHttpClients.toRequest(modelRequest);
   }
 
-  protected ModelHttpResponse transformResponse(HttpResponse<InputStream> java11Response) {
+  /**
+   * hook
+   */
+  protected ModelHttpResponse transformResponse(HttpResponse<InputStream> java11Response)
+      throws IOException {
     return Java11ModelHttpClients.fromResponse(java11Response);
   }
 

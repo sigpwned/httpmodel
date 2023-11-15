@@ -4,6 +4,15 @@ import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
 public class ModelHttpRequestHead {
+  public static ModelHttpRequestHeadBuilder builder() {
+    return new ModelHttpRequestHeadBuilder();
+  }
+
+  public static ModelHttpRequestHead fromRequest(ModelHttpRequest request) {
+    return new ModelHttpRequestHead(request.getVersion(), request.getMethod(), request.getUrl(),
+        request.getHeaders());
+  }
+
   /**
    * @see ModelHttpVersions
    */
@@ -28,6 +37,10 @@ public class ModelHttpRequestHead {
       throw new NullPointerException();
     if (headers == null)
       throw new NullPointerException();
+  }
+
+  /* default */ ModelHttpRequestHead(ModelHttpRequestHeadBuilder b) {
+    this(b.version(), b.method(), b.url().build(), b.headers().build());
   }
 
   public String getVersion() {
@@ -64,6 +77,10 @@ public class ModelHttpRequestHead {
   public ModelHttpRequestHead setHeaders(ModelHttpHeaders headers) {
     this.headers = headers;
     return this;
+  }
+
+  public ModelHttpRequestHeadBuilder toBuilder() {
+    return new ModelHttpRequestHeadBuilder(this);
   }
 
   @Override

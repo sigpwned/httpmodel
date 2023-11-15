@@ -19,6 +19,7 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -63,8 +64,8 @@ public class ModelHttpResponseBuilder {
     return this;
   }
 
-  public ModelHttpResponse build(InputStream entity) {
-    return new ModelHttpResponse(this, entity);
+  public ModelHttpResponse build(InputStream entity) throws IOException {
+    return new ModelHttpResponse(statusCode(), headers(), entity);
   }
 
   @Override

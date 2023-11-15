@@ -51,7 +51,8 @@ public class ModelHttpResponse extends ModelHttpEntityInputStream {
     this.headers = headers;
   }
 
-  /* default */ ModelHttpResponse(ModelHttpResponseBuilder b, InputStream entity) {
+  /* default */ ModelHttpResponse(ModelHttpResponseBuilder b, InputStream entity)
+      throws IOException {
     this(b.statusCode(), b.headers(), entity);
   }
 

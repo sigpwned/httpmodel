@@ -18,6 +18,11 @@ public class ModelHttpUrlBuilder
   }
 
   @Override
+  public ModelHttpUrl build() {
+    return super.build();
+  }
+
+  @Override
   protected ModelHttpQueryStringBuilder newQueryStringBuilder() {
     return new ModelHttpQueryStringBuilder();
   }

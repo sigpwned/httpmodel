@@ -3,6 +3,10 @@ package com.sigpwned.httpmodel.core.model;
 import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
 
 public class ModelHttpResponseHead {
+  public static ModelHttpResponseHead fromResponse(ModelHttpResponse response) {
+    return new ModelHttpResponseHead(response.getStatusCode(), response.getHeaders());
+  }
+
   /**
    * @see ModelHttpStatusCodes
    */

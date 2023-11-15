@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import com.sigpwned.httpmodel.core.io.NullOutputStream;
 
 /**
  * Helper methods for dealing with byte streams
@@ -44,6 +45,15 @@ public final class MoreByteStreams {
     drain(in, out);
 
     return out.toByteArray();
+  }
+
+  /**
+   * Reads the data from the given {@link InputStream} and ignores it
+   *
+   * @throws IOException
+   */
+  public static void drain(InputStream in) throws IOException {
+    drain(in, new NullOutputStream());
   }
 
   /**

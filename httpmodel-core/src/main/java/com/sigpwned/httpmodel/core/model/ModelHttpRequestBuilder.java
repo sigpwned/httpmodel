@@ -21,59 +21,24 @@ package com.sigpwned.httpmodel.core.model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
-import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
 /**
  * Models an HTTP request
  */
-public class ModelHttpRequestBuilder {
-  private String version;
-
-  private String method;
-
-  private ModelHttpRequestUrlBuilder url;
-
-  private ModelHttpRequestHeadersBuilder headers;
-
-  public ModelHttpRequestBuilder() {
-    this.version = ModelHttpVersions.DEFAULT;
-  }
-
-  public ModelHttpRequestBuilder(ModelHttpRequestBuilder that) {
-    this.version = Optional.ofNullable(that.version).orElse(ModelHttpVersions.DEFAULT);
-    this.method = that.method;
-    this.url = new ModelHttpRequestUrlBuilder(this, that.url());
-    this.headers = new ModelHttpRequestHeadersBuilder(this, that.headers());
-  }
-
-  public String version() {
-    return version;
-  }
-
-  public ModelHttpRequestBuilder version(String version) {
-    this.version = version;
-    return this;
-  }
-
-  public String method() {
-    return method;
-  }
-
-  public ModelHttpRequestBuilder method(String method) {
-    this.method = method;
-    return this;
-  }
-
-  public ModelHttpRequestUrlBuilder url() {
-    return url;
-  }
-
-  public ModelHttpRequestHeadersBuilder headers() {
-    return headers;
-  }
+public class ModelHttpRequestBuilder extends
+    ModelHttpRequestHeadBuilderBase<ModelHttpRequestUrlQueryStringBuilder, ModelHttpRequestUrlBuilder, ModelHttpRequestHeadersBuilder, ModelHttpRequestBuilder> {
 
   public ModelHttpRequest build(InputStream entity) throws IOException {
     return new ModelHttpRequest(version(), method(), url().build(), headers().build(), entity);
+  }
+
+  @Override
+  protected ModelHttpRequestUrlBuilder newUrlBuilder() {
+    return new ModelHttpRequestUrlBuilder(this);
+  }
+
+  @Override
+  protected ModelHttpRequestHeadersBuilder newHeadersBuilder() {
+    return new ModelHttpRequestHeadersBuilder(this);
   }
 }
