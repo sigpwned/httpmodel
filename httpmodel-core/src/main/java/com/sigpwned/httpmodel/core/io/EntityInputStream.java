@@ -14,12 +14,14 @@ import java.util.zip.GZIPInputStream;
  * </p>
  *
  * <p>
- * <em>Replacement</em> means completely replacing the underlying input stream with a new one.
+ * <em>Replacement</em> means completely replacing the underlying input stream with a new one. This
+ * is useful when rewriting HTTP entities.
  * </p>
  *
  * <p>
  * <em>Buffering</em> means creating a copy of the contents of the stream for possible replay later.
- * Note that these semantics are different from {@link java.io.BufferedInputStream}.
+ * Note that these semantics are different from {@link java.io.BufferedInputStream}. This is useful
+ * when analyzing request contents, e.g., when signing requests.
  * </p>
  *
  * <p>

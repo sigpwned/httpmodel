@@ -5,7 +5,13 @@ package com.sigpwned.httpmodel.core.client;
 import static java.util.Collections.unmodifiableList;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import com.sigpwned.httpmodel.core.ModelHttpRequestFilter;
+import com.sigpwned.httpmodel.core.ModelHttpRequestInterceptor;
+import com.sigpwned.httpmodel.core.ModelHttpResponseFilter;
+import com.sigpwned.httpmodel.core.ModelHttpResponseInterceptor;
+import com.sigpwned.httpmodel.core.client.connector.ModelHttpConnector;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
@@ -60,35 +66,50 @@ public abstract class DefaultModelHttpClientBase {
       responseInterceptor.intercept(response);
   }
 
+  private static final Comparator<ModelHttpRequestFilter> REQUEST_FILTER_COMPARATOR =
+      Comparator.comparingInt(ModelHttpRequestFilter::priority);
+
   public void addRequestFilter(ModelHttpRequestFilter requestFilter) {
     if (requestFilter == null)
       throw new NullPointerException();
     requestFilters.add(requestFilter);
+    requestFilters.sort(REQUEST_FILTER_COMPARATOR);
   }
 
   public void removeRequestFilter(ModelHttpRequestFilter requestFilter) {
     requestFilters.remove(requestFilter);
   }
 
+  private static final Comparator<ModelHttpRequestInterceptor> REQUEST_INTERCEPTOR_COMPARATOR =
+      Comparator.comparingInt(ModelHttpRequestInterceptor::priority);
+
   public void addRequestInterceptor(ModelHttpRequestInterceptor requestInterceptor) {
     if (requestInterceptor == null)
       throw new NullPointerException();
     requestInterceptors.add(requestInterceptor);
+    requestInterceptors.sort(REQUEST_INTERCEPTOR_COMPARATOR);
   }
 
   public void removeRequestInterceptor(ModelHttpRequestInterceptor requestInterceptor) {
     requestInterceptors.remove(requestInterceptor);
   }
 
+  private static final Comparator<ModelHttpResponseFilter> RESPONSE_FILTER_COMPARATOR =
+      Comparator.comparingInt(ModelHttpResponseFilter::priority);
+
   public void addResponseFilter(ModelHttpResponseFilter responseFilter) {
     if (responseFilter == null)
       throw new NullPointerException();
     responseFilters.add(responseFilter);
+    responseFilters.sort(RESPONSE_FILTER_COMPARATOR);
   }
 
   public void removeResponseFilter(ModelHttpResponseFilter responseFilter) {
     responseFilters.remove(responseFilter);
   }
+
+  private static final Comparator<ModelHttpResponseInterceptor> RESPONSE_INTERCEPTOR_COMPARATOR =
+      Comparator.comparingInt(ModelHttpResponseInterceptor::priority);
 
   public void addResponseInterceptor(ModelHttpResponseInterceptor responseInterceptor) {
     if (responseInterceptor == null)
@@ -98,6 +119,7 @@ public abstract class DefaultModelHttpClientBase {
 
   public void removeResponseInterceptor(ModelHttpResponseInterceptor responseInterceptor) {
     responseInterceptors.remove(responseInterceptor);
+    responseInterceptors.sort(RESPONSE_INTERCEPTOR_COMPARATOR);
   }
 
   protected List<ModelHttpRequestFilter> getRequestFilters() {

@@ -25,7 +25,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.Test;
-import com.sigpwned.httpmodel.core.host.ModelHttpIpV4Host;
+import com.sigpwned.httpmodel.core.model.host.ModelHttpIpV4Host;
 
 public class ModelHttpIpV4HostTest {
   @Test

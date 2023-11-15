@@ -17,15 +17,27 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.core.client.connector;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
+import com.sigpwned.httpmodel.core.util.ModelHttpURLConnections;
 
-public interface ModelHttpClient extends AutoCloseable {
-  public ModelHttpResponse send(ModelHttpRequest request) throws IOException;
-
+/**
+ * A connector implemented using {@link HttpURLConnection}.
+ */
+public class UrlConnectionModelHttpConnector implements ModelHttpConnector {
   @Override
-  default void close() throws IOException {}
+  public ModelHttpResponse send(ModelHttpRequest request) throws IOException {
+    ModelHttpResponse result;
+    HttpURLConnection cn = ModelHttpURLConnections.toRequest(request);
+    try {
+      result = ModelHttpURLConnections.fromResponse(cn);
+    } finally {
+      cn.disconnect();
+    }
+    return result;
+  }
 }

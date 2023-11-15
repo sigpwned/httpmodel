@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import com.sigpwned.httpmodel.core.BeanModelHttpClient;
 import com.sigpwned.httpmodel.core.client.DefaultModelHttpClientBase;
-import com.sigpwned.httpmodel.core.client.ModelHttpConnector;
+import com.sigpwned.httpmodel.core.client.ModelHttpClient;
+import com.sigpwned.httpmodel.core.client.connector.ModelHttpConnector;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
@@ -15,34 +15,45 @@ import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponseHead;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 
-public class DefaultBeanModelHttpClient extends DefaultModelHttpClientBase
-    implements BeanModelHttpClient {
-  private final List<ModelHttpClientRequestMapper<?>> requestMappers;
-  private final List<ModelHttpClientResponseMapper<?>> responseMappers;
-  private final List<ModelHttpClientExceptionMapper> exceptionMappers;
+/**
+ * <p>
+ * Performs a synchronous, round-trip HTTP request. Uses the standard set of steps as documented on
+ * {@link ModelHttpBeanClient}.
+ * </p>
+ *
+ * @see ModelHttpClient
+ */
+public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
+    implements ModelHttpBeanClient {
+  private final List<ModelHttpBeanClientRequestMapper<?>> requestMappers;
+  private final List<ModelHttpBeanClientResponseMapper<?>> responseMappers;
+  private final List<ModelHttpBeanClientExceptionMapper> exceptionMappers;
 
-  public DefaultBeanModelHttpClient(ModelHttpConnector connector) {
+  public DefaultModelHttpBeanClient(ModelHttpConnector connector) {
     super(connector);
     this.requestMappers = new ArrayList<>();
     this.responseMappers = new ArrayList<>();
     this.exceptionMappers = new ArrayList<>();
   }
 
-  public void registerRequestMapper(ModelHttpClientRequestMapper<?> requestMapper) {
+  @Override
+  public void registerRequestMapper(ModelHttpBeanClientRequestMapper<?> requestMapper) {
     // TODO Mapper order?
     if (requestMapper == null)
       throw new NullPointerException();
     requestMappers.add(requestMapper);
   }
 
-  public void registerResponseMapper(ModelHttpClientResponseMapper<?> responseMapper) {
+  @Override
+  public void registerResponseMapper(ModelHttpBeanClientResponseMapper<?> responseMapper) {
     // TODO Mapper order?
     if (responseMapper == null)
       throw new NullPointerException();
     responseMappers.add(responseMapper);
   }
 
-  public void registerExceptionMapper(ModelHttpClientExceptionMapper exceptionMapper) {
+  @Override
+  public void registerExceptionMapper(ModelHttpBeanClientExceptionMapper exceptionMapper) {
     // TODO Mapper order?
     if (exceptionMapper == null)
       throw new NullPointerException();
@@ -97,9 +108,9 @@ public class DefaultBeanModelHttpClient extends DefaultModelHttpClientBase
     ModelHttpMediaType contentType =
         requestHead.getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
             .map(Header::getValue).map(ModelHttpMediaType::fromString).orElse(null);
-    Optional<ModelHttpClientRequestMapper<RequestT>> maybeRequestMapper =
+    Optional<ModelHttpBeanClientRequestMapper<RequestT>> maybeRequestMapper =
         findRequestMapperForRequest(request, contentType);
-    ModelHttpClientRequestMapper<RequestT> requestMapper = maybeRequestMapper.get();
+    ModelHttpBeanClientRequestMapper<RequestT> requestMapper = maybeRequestMapper.get();
     return requestMapper.mapRequest(requestHead, request);
   }
 
@@ -108,7 +119,7 @@ public class DefaultBeanModelHttpClient extends DefaultModelHttpClientBase
    */
   protected IOException doMapException(ModelHttpRequestHead httpRequestHead,
       ModelHttpResponse httpResponseHead) {
-    for (ModelHttpClientExceptionMapper exceptionMapper : getExceptionMappers()) {
+    for (ModelHttpBeanClientExceptionMapper exceptionMapper : getExceptionMappers()) {
       IOException problem = exceptionMapper.mapException(httpRequestHead, httpResponseHead);
       if (problem != null)
         return problem;
@@ -125,49 +136,47 @@ public class DefaultBeanModelHttpClient extends DefaultModelHttpClientBase
     ModelHttpMediaType contentType =
         httpResponse.getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
             .map(Header::getValue).map(ModelHttpMediaType::fromString).orElse(null);
-    Optional<ModelHttpClientResponseMapper<ResponseT>> maybeResponseMapper =
+    Optional<ModelHttpBeanClientResponseMapper<ResponseT>> maybeResponseMapper =
         findResponseMapperForResponseType(responseType, contentType);
-    ModelHttpClientResponseMapper<ResponseT> responseMapper = maybeResponseMapper.get();
+    ModelHttpBeanClientResponseMapper<ResponseT> responseMapper = maybeResponseMapper.get();
     return responseMapper.mapResponse(httpRequestHead, httpResponse);
   }
 
   /**
    * hook
-   *
-   * @throws IOException
    */
   protected ModelHttpResponse doSend(ModelHttpRequest request) throws IOException {
     return getConnector().send(request);
   }
 
   @SuppressWarnings("unchecked")
-  protected <T> Optional<ModelHttpClientRequestMapper<T>> findRequestMapperForRequest(T request,
+  protected <T> Optional<ModelHttpBeanClientRequestMapper<T>> findRequestMapperForRequest(T request,
       ModelHttpMediaType contentType) {
     if (request == null)
       throw new NullPointerException();
     Class<T> requestType = (Class<T>) request.getClass();
     return getRequestMappers().stream().filter(m -> m.isMappable(requestType, contentType))
-        .map(m -> (ModelHttpClientRequestMapper<T>) m).findFirst();
+        .map(m -> (ModelHttpBeanClientRequestMapper<T>) m).findFirst();
   }
 
   @SuppressWarnings("unchecked")
-  protected <T> Optional<ModelHttpClientResponseMapper<T>> findResponseMapperForResponseType(
+  protected <T> Optional<ModelHttpBeanClientResponseMapper<T>> findResponseMapperForResponseType(
       Class<T> responseType, ModelHttpMediaType contentType) {
     if (responseType == null)
       throw new NullPointerException();
     return getResponseMappers().stream().filter(m -> m.isMappable(responseType, contentType))
-        .map(m -> (ModelHttpClientResponseMapper<T>) m).findFirst();
+        .map(m -> (ModelHttpBeanClientResponseMapper<T>) m).findFirst();
   }
 
-  private List<ModelHttpClientRequestMapper<?>> getRequestMappers() {
+  private List<ModelHttpBeanClientRequestMapper<?>> getRequestMappers() {
     return requestMappers;
   }
 
-  private List<ModelHttpClientResponseMapper<?>> getResponseMappers() {
+  private List<ModelHttpBeanClientResponseMapper<?>> getResponseMappers() {
     return responseMappers;
   }
 
-  private List<ModelHttpClientExceptionMapper> getExceptionMappers() {
+  private List<ModelHttpBeanClientExceptionMapper> getExceptionMappers() {
     return exceptionMappers;
   }
 }

@@ -17,59 +17,51 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.host;
+package com.sigpwned.httpmodel.core.model.host;
 
-import java.net.Inet6Address;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Objects;
 import com.sigpwned.httpmodel.core.model.ModelHttpHost;
 import com.sigpwned.httpmodel.core.org.apache.commons.validator.routines.InetAddressValidator;
 
 /**
- * Validation code is based on Apache Commons Validator InetAddressValidator class.
- *
- * @see <a href=
- *      "https://github.com/apache/commons-validator/blob/master/src/main/java/org/apache/commons/validator/routines/InetAddressValidator.java">https://github.com/apache/commons-validator/blob/master/src/main/java/org/apache/commons/validator/routines/InetAddressValidator.java</a>
+ * Models an IPV4 host
  */
-public class ModelHttpIpV6Host extends ModelHttpHost {
-  public static ModelHttpIpV6Host fromString(String s) {
-    if (!s.startsWith("[") || !s.endsWith("]"))
-      throw new IllegalArgumentException("must be a valid IPv6 address surrounded by [ ]");
+public class ModelHttpIpV4Host extends ModelHttpHost {
+  public static ModelHttpIpV4Host fromString(String s) {
+    if (!InetAddressValidator.getInstance().isValidInet4Address(s))
+      throw new IllegalArgumentException("must be a valid IPv4 address of the form a.b.c.d");
 
-    s = s.substring(1, s.length() - 1);
-
-    if (!InetAddressValidator.getInstance().isValidInet6Address(s))
-      throw new IllegalArgumentException("must contain a valid IPv6 address");
-
-    Inet6Address address;
+    Inet4Address address;
     try {
-      address = (Inet6Address) InetAddress.getByName(s);
+      address = (Inet4Address) InetAddress.getByName(s);
     } catch (Exception e) {
-      throw new IllegalArgumentException("not a valid IPv6 address", e);
+      throw new IllegalArgumentException("not a valid IPv4 address", e);
     }
 
     return of(address);
   }
 
-  public static ModelHttpIpV6Host of(Inet6Address address) {
-    return new ModelHttpIpV6Host(address);
+  public static ModelHttpIpV4Host of(Inet4Address address) {
+    return new ModelHttpIpV4Host(address);
   }
 
-  private Inet6Address address;
+  private Inet4Address address;
 
-  public ModelHttpIpV6Host(Inet6Address address) {
-    super(Type.IPV6);
+  public ModelHttpIpV4Host(Inet4Address address) {
+    super(Type.IPV4);
     setAddress(address);
   }
 
   /**
    * @return the address
    */
-  public Inet6Address getAddress() {
+  public Inet4Address getAddress() {
     return address;
   }
 
-  public ModelHttpIpV6Host setAddress(Inet6Address address) {
+  public ModelHttpIpV4Host setAddress(Inet4Address address) {
     if (address == null)
       throw new NullPointerException();
     this.address = address;
@@ -92,12 +84,12 @@ public class ModelHttpIpV6Host extends ModelHttpHost {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ModelHttpIpV6Host other = (ModelHttpIpV6Host) obj;
+    ModelHttpIpV4Host other = (ModelHttpIpV4Host) obj;
     return Objects.equals(address, other.address);
   }
 
   @Override
   public String toString() {
-    return "[" + getAddress().getHostAddress() + "]";
+    return getAddress().getHostAddress();
   }
 }

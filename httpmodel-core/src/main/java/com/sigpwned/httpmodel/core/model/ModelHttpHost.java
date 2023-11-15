@@ -20,9 +20,9 @@
 package com.sigpwned.httpmodel.core.model;
 
 import java.util.Objects;
-import com.sigpwned.httpmodel.core.host.ModelHttpHostnameHost;
-import com.sigpwned.httpmodel.core.host.ModelHttpIpV4Host;
-import com.sigpwned.httpmodel.core.host.ModelHttpIpV6Host;
+import com.sigpwned.httpmodel.core.model.host.ModelHttpHostnameHost;
+import com.sigpwned.httpmodel.core.model.host.ModelHttpIpV4Host;
+import com.sigpwned.httpmodel.core.model.host.ModelHttpIpV6Host;
 
 /**
  * Models an HTTP URL host. Must be one of hostname, IPv4 address host, or IPv6 address host.

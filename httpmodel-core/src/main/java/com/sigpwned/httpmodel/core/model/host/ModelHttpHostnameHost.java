@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.host;
+package com.sigpwned.httpmodel.core.model.host;
 
 import java.util.Objects;
 import java.util.regex.Pattern;

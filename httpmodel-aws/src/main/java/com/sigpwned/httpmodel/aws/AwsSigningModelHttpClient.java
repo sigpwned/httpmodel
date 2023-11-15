@@ -20,8 +20,8 @@
 package com.sigpwned.httpmodel.aws;
 
 import java.io.IOException;
-import com.sigpwned.httpmodel.core.ModelHttpClient;
 import com.sigpwned.httpmodel.core.client.FilteringModelHttpClient;
+import com.sigpwned.httpmodel.core.client.ModelHttpClient;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 
 public class AwsSigningModelHttpClient extends FilteringModelHttpClient {

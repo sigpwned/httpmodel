@@ -25,7 +25,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.Test;
-import com.sigpwned.httpmodel.core.host.ModelHttpIpV6Host;
+import com.sigpwned.httpmodel.core.model.host.ModelHttpIpV6Host;
 
 public class ModelHttpIpV6HostTest {
   @Test
