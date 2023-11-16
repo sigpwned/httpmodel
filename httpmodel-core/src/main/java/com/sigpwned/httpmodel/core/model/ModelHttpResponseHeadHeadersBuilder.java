@@ -19,27 +19,28 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import static java.util.Collections.emptyList;
 import java.util.List;
-import com.sigpwned.httpmodel.core.model.ModelHttpQueryString.Parameter;
+import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 
-public class ModelHttpQueryStringBuilder
-    extends ModelHttpQueryStringBuilderBase<ModelHttpQueryStringBuilder> {
-  public ModelHttpQueryStringBuilder() {}
-
-  public ModelHttpQueryStringBuilder(List<Parameter> parameters) {
-    super(parameters);
+public class ModelHttpResponseHeadHeadersBuilder extends
+    ModelHttpHeadersChildBuilderBase<ModelHttpResponseHeadBuilder, ModelHttpResponseHeadHeadersBuilder> {
+  /* default */ ModelHttpResponseHeadHeadersBuilder(ModelHttpResponseHeadBuilder parent) {
+    this(parent, emptyList());
   }
 
-  public ModelHttpQueryStringBuilder(ModelHttpQueryString that) {
-    super(that);
+  /* default */ ModelHttpResponseHeadHeadersBuilder(ModelHttpResponseHeadBuilder parent,
+      ModelHttpResponseHeadHeadersBuilder that) {
+    this(parent, that.headers());
   }
 
-  public ModelHttpQueryStringBuilder(ModelHttpQueryStringBuilder that) {
-    super(that);
+  /* default */ ModelHttpResponseHeadHeadersBuilder(ModelHttpResponseHeadBuilder parent,
+      ModelHttpHeaders that) {
+    this(parent, that.getHeaders());
   }
 
-  @Override
-  public ModelHttpQueryString build() {
-    return super.build();
+  /* default */ ModelHttpResponseHeadHeadersBuilder(ModelHttpResponseHeadBuilder parent,
+      List<Header> headers) {
+    super(parent, headers);
   }
 }

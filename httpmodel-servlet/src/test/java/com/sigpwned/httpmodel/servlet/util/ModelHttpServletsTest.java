@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,18 +28,20 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
-import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
+import com.sigpwned.httpmodel.core.entity.PlainTextModelHttpEntity;
+import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
+import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 import com.sigpwned.httpmodel.core.model.ModelHttpUrl;
 import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
+import com.sigpwned.httpmodel.core.util.ModelHttpRequests;
 import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
@@ -55,18 +57,24 @@ public class ModelHttpServletsTest {
     when(req.getRequestURI()).thenReturn("/path/to/example");
     when(req.getHeaderNames()).thenReturn(emptyEnumeration());
 
-    ModelHttpRequest request = ModelHttpServlets.fromRequest(req);
+    ModelHttpRequest got = ModelHttpServlets.fromRequest(req);
 
-    assertThat(request, is(ModelHttpRequest.of(ModelHttpVersions.HTTP_1_1, ModelHttpMethods.GET,
-        ModelHttpUrl.fromString("http://localhost:8080/path/to/example"), Optional.empty())));
+    ModelHttpRequest want = new ModelHttpRequestHead(ModelHttpVersions.HTTP_1_1,
+        ModelHttpMethods.GET, ModelHttpUrl.fromString("http://localhost:8080/path/to/example"),
+        new ModelHttpHeaders()).toRequest();
+
+    // We still want the description to print, so do this
+    if (!ModelHttpRequests.equals(want, got))
+      assertThat(got, is(want));
   }
 
   @Test
   public void shouldConvertResponseProperly() throws IOException {
-    byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
+    String textString = "hello";
+    byte[] textBytes = textString.getBytes(StandardCharsets.UTF_8);
 
-    ModelHttpResponse response = ModelHttpResponse.of(ModelHttpStatusCodes.OK,
-        ModelHttpEntity.of(ModelHttpMediaTypes.TEXT_PLAIN, bytes));
+    ModelHttpResponse response = new ModelHttpResponse(ModelHttpStatusCodes.OK,
+        new ModelHttpHeaders(), new PlainTextModelHttpEntity("hello"));
 
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -90,10 +98,11 @@ public class ModelHttpServletsTest {
 
     ModelHttpServlets.toResponse(res, response);
 
-    verify(res).setContentType(ModelHttpMediaTypes.TEXT_PLAIN.toString());
-    verify(res).setContentLength(bytes.length);
+    verify(res).setContentType(
+        ModelHttpMediaTypes.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8).toString());
+    verify(res).setContentLengthLong(textBytes.length);
     verify(res).setStatus(ModelHttpStatusCodes.OK);
 
-    assertThat(out.toByteArray(), is(bytes));
+    assertThat(out.toByteArray(), is(textBytes));
   }
 }

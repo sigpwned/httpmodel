@@ -137,7 +137,7 @@
         <module>httpmodel-java11-client</module>
         <module>httpmodel-servlet</module>
         <module>httpmodel-jakarta-servlet</module>
-        <module>httpmodel-aws</module>
+        <!-- <module>httpmodel-aws</module> -->
     </modules>
 
     <!-- For releasing to maven central -->

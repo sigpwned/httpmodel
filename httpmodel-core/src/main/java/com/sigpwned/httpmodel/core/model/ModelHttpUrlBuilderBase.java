@@ -101,6 +101,31 @@ public abstract class ModelHttpUrlBuilderBase<QueryStringBuilderT extends ModelH
     return (BuilderT) this;
   }
 
+  /**
+   * Appends {@code suffix} to this URL's current {@code path}. The two strings will be separated by
+   * exactly one {@code /}, regardless of whether {@code path} ends with {@code /} or {@code suffix}
+   * begins with {@code /}. If {@code suffix} is empty, then this method has no effect.
+   *
+   * @throws NullPointerException if {@code suffix} is {@code null}
+   */
+  @SuppressWarnings("unchecked")
+  public BuilderT appendPath(String suffix) {
+    if (suffix == null)
+      throw new NullPointerException();
+
+    while (suffix.startsWith("/"))
+      suffix = suffix.substring(1, suffix.length());
+    if (suffix.isEmpty())
+      return (BuilderT) this;
+
+    String newPath = path();
+    while (newPath.endsWith("/"))
+      newPath = newPath.substring(0, newPath.length() - 1);
+    newPath = newPath + "/" + suffix;
+
+    return path(newPath);
+  }
+
   public QueryStringBuilderT queryString() {
     return queryString;
   }

@@ -31,8 +31,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import com.sigpwned.httpmodel.core.entity.ModelHttpFormData.Entry;
-import com.sigpwned.httpmodel.core.io.EntityInputStream;
+import com.sigpwned.httpmodel.core.entity.FormDataModelHttpEntity.Entry;
+import com.sigpwned.httpmodel.core.io.BufferedInputStream;
 import com.sigpwned.httpmodel.core.io.buffered.MemoryBufferedInputStream;
 import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
 import com.sigpwned.httpmodel.core.model.ModelHttpEntityInputStream;
@@ -43,9 +43,9 @@ import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
 /**
  * Models an HTTP entity of type application/x-www-form-urlencoded.
  */
-public class ModelHttpFormData extends ModelHttpEntity implements Iterable<Entry> {
+public class FormDataModelHttpEntity implements ModelHttpEntity, Iterable<Entry> {
   public static final ModelHttpMediaType CONTENT_TYPE =
-      ModelHttpMediaTypes.APPLICATION_X_WWW_FORM_URLENCODED;
+      ModelHttpMediaTypes.APPLICATION_X_WWW_FORM_URLENCODED.withCharset(StandardCharsets.UTF_8);
 
   private static final Pattern AMPERSAND = Pattern.compile("&");
 
@@ -137,7 +137,8 @@ public class ModelHttpFormData extends ModelHttpEntity implements Iterable<Entry
    *
    * @see #fromString(String)
    */
-  public static ModelHttpFormData fromEntity(ModelHttpEntityInputStream entity) throws IOException {
+  public static FormDataModelHttpEntity fromEntity(ModelHttpEntityInputStream entity)
+      throws IOException {
     return fromString(entity.toString(StandardCharsets.UTF_8));
   }
 
@@ -149,22 +150,22 @@ public class ModelHttpFormData extends ModelHttpEntity implements Iterable<Entry
    * @see Entry#fromString(String)
    * @see #toString()
    */
-  public static ModelHttpFormData fromString(String s) {
-    return ModelHttpFormData.of(AMPERSAND.splitAsStream(s).filter(nv -> !nv.isEmpty())
+  public static FormDataModelHttpEntity fromString(String s) {
+    return FormDataModelHttpEntity.of(AMPERSAND.splitAsStream(s).filter(nv -> !nv.isEmpty())
         .map(Entry::fromString).collect(toList()));
   }
 
-  public static ModelHttpFormData of(Entry... entries) {
-    return new ModelHttpFormData(asList(entries));
+  public static FormDataModelHttpEntity of(Entry... entries) {
+    return new FormDataModelHttpEntity(asList(entries));
   }
 
-  public static ModelHttpFormData of(List<Entry> entries) {
-    return new ModelHttpFormData(entries);
+  public static FormDataModelHttpEntity of(List<Entry> entries) {
+    return new FormDataModelHttpEntity(entries);
   }
 
   private final List<Entry> entries;
 
-  public ModelHttpFormData(List<Entry> entries) {
+  public FormDataModelHttpEntity(List<Entry> entries) {
     if (entries == null)
       throw new NullPointerException();
     this.entries = unmodifiableList(entries);
@@ -198,13 +199,18 @@ public class ModelHttpFormData extends ModelHttpEntity implements Iterable<Entry
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ModelHttpFormData other = (ModelHttpFormData) obj;
+    FormDataModelHttpEntity other = (FormDataModelHttpEntity) obj;
     return Objects.equals(entries, other.entries);
   }
 
   @Override
-  public EntityInputStream toEntityInputStream() {
-    return new EntityInputStream(new MemoryBufferedInputStream(toString(), StandardCharsets.UTF_8));
+  public ModelHttpMediaType getContentType() {
+    return CONTENT_TYPE;
+  }
+
+  @Override
+  public BufferedInputStream toInputStream() {
+    return new MemoryBufferedInputStream(toString(), StandardCharsets.UTF_8);
   }
 
   /**

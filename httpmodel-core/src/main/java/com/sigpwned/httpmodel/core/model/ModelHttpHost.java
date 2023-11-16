@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,8 @@ import com.sigpwned.httpmodel.core.model.host.ModelHttpIpV6Host;
 
 /**
  * Models an HTTP URL host. Must be one of hostname, IPv4 address host, or IPv6 address host.
- * 
+ * Immutable.
+ *
  * @see ModelHttpHostnameHost
  * @see ModelHttpIpV4Host
  * @see ModelHttpIpV6Host
@@ -34,7 +35,7 @@ import com.sigpwned.httpmodel.core.model.host.ModelHttpIpV6Host;
 public abstract class ModelHttpHost {
   /**
    * Parses a valid HTTP URL host from the given string.
-   * 
+   *
    * @see ModelHttpHostnameHost#fromString(String)
    * @see ModelHttpIpV4Host#fromString(String)
    * @see ModelHttpIpV6Host#fromString(String)
@@ -121,5 +122,6 @@ public abstract class ModelHttpHost {
   /**
    * Returns the given host in a valid stringized form
    */
+  @Override
   public abstract String toString();
 }

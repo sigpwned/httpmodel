@@ -25,51 +25,18 @@ import java.io.InputStream;
 /**
  * Models an HTTP response
  */
-public class ModelHttpResponseBuilder {
-  private int statusCode;
-
-  private ModelHttpHeaders headers;
-
-  public ModelHttpResponseBuilder() {}
-
-  public ModelHttpResponseBuilder(ModelHttpResponseBuilder that) {
-    if (that == null)
-      throw new NullPointerException();
-    this.statusCode = that.statusCode;
-    this.headers = that.headers;
-  }
-
-  public ModelHttpResponseBuilder(ModelHttpResponse that) {
-    if (that == null)
-      throw new NullPointerException();
-    this.statusCode = that.getStatusCode();
-    this.headers = that.getHeaders();
-  }
-
-  public int statusCode() {
-    return statusCode;
-  }
-
-  public ModelHttpResponseBuilder statusCode(int statusCode) {
-    this.statusCode = statusCode;
-    return this;
-  }
-
-  public ModelHttpHeaders headers() {
-    return headers;
-  }
-
-  public ModelHttpResponseBuilder headers(ModelHttpHeaders headers) {
-    this.headers = headers;
-    return this;
+public class ModelHttpResponseBuilder extends
+    ModelHttpResponseHeadBuilderBase<ModelHttpResponseHeadersBuilder, ModelHttpResponseBuilder> {
+  public ModelHttpResponse build(ModelHttpEntity entity) throws IOException {
+    return new ModelHttpResponse(statusCode(), headers().build(), entity);
   }
 
   public ModelHttpResponse build(InputStream entity) throws IOException {
-    return new ModelHttpResponse(statusCode(), headers(), entity);
+    return new ModelHttpResponse(statusCode(), headers().build(), entity);
   }
 
   @Override
-  public String toString() {
-    return "ModelHttpResponseBuilder [statusCode=" + statusCode + ", headers=" + headers + "]";
+  protected ModelHttpResponseHeadersBuilder newHeadersBuilder() {
+    return new ModelHttpResponseHeadersBuilder(this);
   }
 }

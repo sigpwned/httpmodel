@@ -28,14 +28,16 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import org.junit.Test;
-import com.sigpwned.httpmodel.core.model.ModelHttpEntity;
+import com.sigpwned.httpmodel.core.entity.PlainTextModelHttpEntity;
+import com.sigpwned.httpmodel.core.model.ModelHttpHeaders;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
+import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 import com.sigpwned.httpmodel.core.model.ModelHttpUrl;
 import com.sigpwned.httpmodel.core.util.ModelHttpMediaTypes;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
+import com.sigpwned.httpmodel.core.util.ModelHttpRequests;
 import com.sigpwned.httpmodel.core.util.ModelHttpStatusCodes;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 import jakarta.servlet.ServletOutputStream;
@@ -55,18 +57,23 @@ public class ModelHttpServletsTest {
     when(req.getRequestURI()).thenReturn("/path/to/example");
     when(req.getHeaderNames()).thenReturn(emptyEnumeration());
 
-    ModelHttpRequest request = ModelHttpServlets.fromRequest(req);
+    ModelHttpRequest got = ModelHttpServlets.fromRequest(req);
 
-    assertThat(request, is(new ModelHttpRequest(ModelHttpVersions.HTTP_1_1, ModelHttpMethods.GET,
-        ModelHttpUrl.fromString("http://localhost:8080/path/to/example"), Optional.empty())));
+    ModelHttpRequest want = new ModelHttpRequestHead(ModelHttpVersions.HTTP_1_1,
+        ModelHttpMethods.GET, ModelHttpUrl.fromString("http://localhost:8080/path/to/example"),
+        new ModelHttpHeaders()).toRequest();
+
+    if (!ModelHttpRequests.equals(want, got))
+      assertThat(want, is(got));
   }
 
   @Test
   public void shouldConvertResponseProperly() throws IOException {
-    byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
+    String textString = "hello";
+    byte[] textBytes = textString.getBytes(StandardCharsets.UTF_8);
 
-    ModelHttpResponse response = ModelHttpResponse.of(ModelHttpStatusCodes.OK,
-        new ModelHttpEntity(ModelHttpMediaTypes.TEXT_PLAIN, bytes));
+    ModelHttpResponse response = new ModelHttpResponse(ModelHttpStatusCodes.OK,
+        new ModelHttpHeaders(), new PlainTextModelHttpEntity("hello"));
 
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -90,10 +97,11 @@ public class ModelHttpServletsTest {
 
     ModelHttpServlets.toResponse(res, response);
 
-    verify(res).setContentType(ModelHttpMediaTypes.TEXT_PLAIN.toString());
-    verify(res).setContentLength(bytes.length);
+    verify(res).setContentType(
+        ModelHttpMediaTypes.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8).toString());
+    verify(res).setContentLengthLong(textBytes.length);
     verify(res).setStatus(ModelHttpStatusCodes.OK);
 
-    assertThat(out.toByteArray(), is(bytes));
+    assertThat(out.toByteArray(), is(textBytes));
   }
 }

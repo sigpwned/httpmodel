@@ -42,6 +42,30 @@ public class ModelHttpResponse extends ModelHttpEntityInputStream {
 
   private ModelHttpHeaders headers;
 
+  public ModelHttpResponse(ModelHttpResponseHead head) throws IOException {
+    this(head, (InputStream) null);
+  }
+
+  public ModelHttpResponse(ModelHttpResponseHead head, ModelHttpEntity entity) throws IOException {
+    this(head.getStatusCode(), head.getHeaders(), entity);
+  }
+
+  public ModelHttpResponse(ModelHttpResponseHead head, InputStream entity) throws IOException {
+    this(head.getStatusCode(), head.getHeaders(), entity);
+  }
+
+  public ModelHttpResponse(int statusCode, ModelHttpHeaders headers, ModelHttpEntity entity)
+      throws IOException {
+    this(statusCode,
+        entity != null
+            ? headers.toBuilder()
+                .setOnlyHeader(ModelHttpHeaderNames.CONTENT_TYPE,
+                    entity.getContentType().toString())
+                .build()
+            : null,
+        entity != null ? entity.toInputStream() : null);
+  }
+
   public ModelHttpResponse(int statusCode, ModelHttpHeaders headers, InputStream entity)
       throws IOException {
     super(entity);
@@ -49,11 +73,6 @@ public class ModelHttpResponse extends ModelHttpEntityInputStream {
       throw new NullPointerException();
     this.statusCode = statusCode;
     this.headers = headers;
-  }
-
-  /* default */ ModelHttpResponse(ModelHttpResponseBuilder b, InputStream entity)
-      throws IOException {
-    this(b.statusCode(), b.headers(), entity);
   }
 
   public int getStatusCode() {

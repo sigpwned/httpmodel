@@ -51,11 +51,27 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
   private ModelHttpHeaders headers;
 
   public ModelHttpRequest(ModelHttpRequestHead head) throws IOException {
-    this(head, null);
+    this(head, (InputStream) null);
+  }
+
+  public ModelHttpRequest(ModelHttpRequestHead head, ModelHttpEntity entity) throws IOException {
+    this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(), entity);
   }
 
   public ModelHttpRequest(ModelHttpRequestHead head, InputStream entity) throws IOException {
     this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(), entity);
+  }
+
+  public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
+      ModelHttpEntity entity) throws IOException {
+    this(version, method, url,
+        entity != null
+            ? headers.toBuilder()
+                .setOnlyHeader(ModelHttpHeaderNames.CONTENT_TYPE,
+                    entity.getContentType().toString())
+                .build()
+            : null,
+        entity != null ? entity.toInputStream() : null);
   }
 
   public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,

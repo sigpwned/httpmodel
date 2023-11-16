@@ -19,7 +19,6 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
-import java.io.IOException;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
@@ -108,10 +107,6 @@ public abstract class ModelHttpRequestHeadBuilderBase<QueryStringBuilderT extend
       headers = newHeadersBuilder();
     headers.assign(newHeaders);
     return (BuilderT) this;
-  }
-
-  public ModelHttpRequestHead build() throws IOException {
-    return new ModelHttpRequestHead(version(), method(), url().build(), headers().build());
   }
 
   protected abstract UrlBuilderT newUrlBuilder();

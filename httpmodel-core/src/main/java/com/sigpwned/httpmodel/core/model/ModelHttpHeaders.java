@@ -40,6 +40,10 @@ import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
  * @see ModelHttpHeaderNames
  */
 public class ModelHttpHeaders implements Iterable<Header> {
+  public static ModelHttpHeadersBuilder builder() {
+    return new ModelHttpHeadersBuilder();
+  }
+
   /**
    * Models an HTTP header. Header names are lowercased automatically.
    */
@@ -204,6 +208,10 @@ public class ModelHttpHeaders implements Iterable<Header> {
           break;
       }
     }
+  }
+
+  public ModelHttpHeadersBuilder toBuilder() {
+    return new ModelHttpHeadersBuilder(this);
   }
 
   @Override

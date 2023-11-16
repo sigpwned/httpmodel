@@ -28,6 +28,10 @@ import java.io.InputStream;
 public class ModelHttpRequestBuilder extends
     ModelHttpRequestHeadBuilderBase<ModelHttpRequestUrlQueryStringBuilder, ModelHttpRequestUrlBuilder, ModelHttpRequestHeadersBuilder, ModelHttpRequestBuilder> {
 
+  public ModelHttpRequest build(ModelHttpEntity entity) throws IOException {
+    return new ModelHttpRequest(version(), method(), url().build(), headers().build(), entity);
+  }
+
   public ModelHttpRequest build(InputStream entity) throws IOException {
     return new ModelHttpRequest(version(), method(), url().build(), headers().build(), entity);
   }

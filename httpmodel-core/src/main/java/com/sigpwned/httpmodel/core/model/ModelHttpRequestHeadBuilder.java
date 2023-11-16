@@ -19,8 +19,6 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
-import java.io.IOException;
-
 /**
  * Models an HTTP request
  */
@@ -35,8 +33,7 @@ public class ModelHttpRequestHeadBuilder extends
     headers(value.getHeaders());
   }
 
-  @Override
-  public ModelHttpRequestHead build() throws IOException {
+  public ModelHttpRequestHead build() {
     return new ModelHttpRequestHead(version(), method(), url().build(), headers().build());
   }
 

@@ -17,29 +17,28 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.model;
+package com.sigpwned.httpmodel.core.util;
 
-import java.util.List;
-import com.sigpwned.httpmodel.core.model.ModelHttpQueryString.Parameter;
+import java.io.IOException;
+import java.util.Objects;
+import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 
-public class ModelHttpQueryStringBuilder
-    extends ModelHttpQueryStringBuilderBase<ModelHttpQueryStringBuilder> {
-  public ModelHttpQueryStringBuilder() {}
+public final class ModelHttpResponses {
+  private ModelHttpResponses() {}
 
-  public ModelHttpQueryStringBuilder(List<Parameter> parameters) {
-    super(parameters);
+  public static int hashCode(ModelHttpResponse httpResponse) throws IOException {
+    return Objects.hash(httpResponse.getHeaders(), httpResponse.getStatusCode(),
+        EntityInputStreams.hashCode(httpResponse));
   }
 
-  public ModelHttpQueryStringBuilder(ModelHttpQueryString that) {
-    super(that);
-  }
-
-  public ModelHttpQueryStringBuilder(ModelHttpQueryStringBuilder that) {
-    super(that);
-  }
-
-  @Override
-  public ModelHttpQueryString build() {
-    return super.build();
+  public static boolean equals(ModelHttpResponse a, ModelHttpResponse b) throws IOException {
+    if (a == b)
+      return true;
+    if (a == null || b == null)
+      return false;
+    if (a.getClass() != b.getClass())
+      return false;
+    return Objects.equals(a.getHeaders(), b.getHeaders()) && a.getStatusCode() == b.getStatusCode()
+        && EntityInputStreams.contentEquals(a, b);
   }
 }

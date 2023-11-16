@@ -1,5 +1,26 @@
+/*-
+ * =================================LICENSE_START==================================
+ * httpmodel-core
+ * ====================================SECTION=====================================
+ * Copyright (C) 2022 - 2023 Andy Boothe
+ * ====================================SECTION=====================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ==================================LICENSE_END===================================
+ */
 package com.sigpwned.httpmodel.core.model;
 
+import java.io.IOException;
+import java.io.InputStream;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
@@ -37,6 +58,10 @@ public class ModelHttpRequestHead {
       throw new NullPointerException();
     if (headers == null)
       throw new NullPointerException();
+    this.version = version;
+    this.method = method;
+    this.url = url;
+    this.headers = headers;
   }
 
   /* default */ ModelHttpRequestHead(ModelHttpRequestHeadBuilder b) {
@@ -81,6 +106,18 @@ public class ModelHttpRequestHead {
 
   public ModelHttpRequestHeadBuilder toBuilder() {
     return new ModelHttpRequestHeadBuilder(this);
+  }
+
+  public ModelHttpRequest toRequest() throws IOException {
+    return new ModelHttpRequest(this);
+  }
+
+  public ModelHttpRequest toRequest(ModelHttpEntity entity) throws IOException {
+    return new ModelHttpRequest(this, entity);
+  }
+
+  public ModelHttpRequest toRequest(InputStream entity) throws IOException {
+    return new ModelHttpRequest(this, entity);
   }
 
   @Override

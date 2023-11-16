@@ -24,13 +24,9 @@ import java.util.OptionalInt;
 import java.util.regex.Pattern;
 
 /**
- * Models a URL authority, which is the host and (optional) port.
+ * Models a URL authority, which is the host and (optional) port. Immutable.
  */
 public class ModelHttpAuthority {
-  public static ModelHttpAuthorityBuilder builder() {
-    return new ModelHttpAuthorityBuilder();
-  }
-
   private static final Pattern COLON = Pattern.compile(":");
 
   /**
@@ -75,9 +71,9 @@ public class ModelHttpAuthority {
 
   public static final int MAX_PORT = 65535;
 
-  private ModelHttpHost host;
+  private final ModelHttpHost host;
 
-  private Integer port;
+  private final Integer port;
 
   public ModelHttpAuthority(ModelHttpHost host, Integer port) {
     if (host == null)
@@ -88,30 +84,20 @@ public class ModelHttpAuthority {
     this.port = port;
   }
 
-  public ModelHttpAuthority(ModelHttpAuthorityBuilder that) {
-    this(that.host(), that.port());
-  }
-
   public ModelHttpHost getHost() {
     return host;
   }
 
-  public ModelHttpAuthority setHost(ModelHttpHost host) {
-    this.host = host;
-    return this;
+  public ModelHttpAuthority withHost(ModelHttpHost newHost) {
+    return new ModelHttpAuthority(newHost, getPort());
   }
 
   public Integer getPort() {
     return port;
   }
 
-  public ModelHttpAuthority setPort(Integer port) {
-    this.port = port;
-    return this;
-  }
-
-  public ModelHttpAuthorityBuilder toBuilder() {
-    return new ModelHttpAuthorityBuilder(this);
+  public ModelHttpAuthority withPort(Integer newPort) {
+    return new ModelHttpAuthority(getHost(), newPort);
   }
 
   @Override

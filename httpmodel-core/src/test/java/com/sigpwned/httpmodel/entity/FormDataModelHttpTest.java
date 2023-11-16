@@ -23,20 +23,20 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Test;
-import com.sigpwned.httpmodel.core.entity.ModelHttpFormData;
+import com.sigpwned.httpmodel.core.entity.FormDataModelHttpEntity;
 
-public class ModelHttpFormDataTest {
+public class FormDataModelHttpTest {
   @Test
   public void shouldConvertFromStringProperly() {
-    ModelHttpFormData entity = ModelHttpFormData.fromString("alpha=bravo%21&charlie=delta%20echo");
-    assertThat(entity, is(ModelHttpFormData.of(asList(ModelHttpFormData.Entry.of("alpha", "bravo!"),
-        ModelHttpFormData.Entry.of("charlie", "delta echo")))));
+    FormDataModelHttpEntity entity = FormDataModelHttpEntity.fromString("alpha=bravo%21&charlie=delta%20echo");
+    assertThat(entity, is(FormDataModelHttpEntity.of(asList(FormDataModelHttpEntity.Entry.of("alpha", "bravo!"),
+        FormDataModelHttpEntity.Entry.of("charlie", "delta echo")))));
   }
 
   @Test
   public void shouldConvertToStringProperly() {
-    String string = ModelHttpFormData.of(asList(ModelHttpFormData.Entry.of("alpha", "bravo!"),
-        ModelHttpFormData.Entry.of("charlie", "delta echo"))).toString();
+    String string = FormDataModelHttpEntity.of(asList(FormDataModelHttpEntity.Entry.of("alpha", "bravo!"),
+        FormDataModelHttpEntity.Entry.of("charlie", "delta echo"))).toString();
     assertThat(string, is("alpha=bravo%21&charlie=delta%20echo"));
   }
 }
