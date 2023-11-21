@@ -100,10 +100,11 @@ public final class ModelHttpURLConnections {
 
     InputStream entity;
     if (ModelHttpEntities.responseEntityExists(cn.getRequestMethod(), statusCode)) {
-      if (statusCode / 100 == 2) {
-        entity = cn.getInputStream();
-      } else {
+      int statusGroup = statusCode / 100;
+      if (statusGroup == 4 || statusGroup == 5) {
         entity = cn.getErrorStream();
+      } else {
+        entity = cn.getInputStream();
       }
     } else {
       entity = null;

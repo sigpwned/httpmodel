@@ -19,6 +19,8 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
@@ -34,8 +36,12 @@ public abstract class ModelHttpRequestHeadBuilderBase<QueryStringBuilderT extend
 
   private HeadersBuilderT headers;
 
+  private Map<String, Object> properties;
+
   public ModelHttpRequestHeadBuilderBase() {
     this.version = ModelHttpVersions.DEFAULT;
+    this.headers = newHeadersBuilder();
+    this.properties = new HashMap<>();
   }
 
   public ModelHttpRequestHeadBuilderBase(BuilderT that) {
@@ -43,6 +49,7 @@ public abstract class ModelHttpRequestHeadBuilderBase<QueryStringBuilderT extend
     this.method = that.method();
     this.url = that.url();
     this.headers = that.headers();
+    this.properties = that.properties();
   }
 
   public ModelHttpRequestHeadBuilderBase(ModelHttpRequestHead that) {
@@ -50,6 +57,7 @@ public abstract class ModelHttpRequestHeadBuilderBase<QueryStringBuilderT extend
     this.method = that.getMethod();
     this.url = that.getUrl() != null ? newUrlBuilder().assign(that.getUrl()) : null;
     this.headers = newHeadersBuilder().assign(that.getHeaders());
+    this.properties = new HashMap<>(that.getProperties());
   }
 
 
@@ -105,8 +113,43 @@ public abstract class ModelHttpRequestHeadBuilderBase<QueryStringBuilderT extend
   public BuilderT headers(ModelHttpHeaders newHeaders) {
     if (headers == null)
       headers = newHeadersBuilder();
-    headers.assign(newHeaders);
+    if (newHeaders != null) {
+      headers.assign(newHeaders);
+    } else {
+      headers.clear();
+    }
     return (BuilderT) this;
+  }
+
+  @SuppressWarnings("unchecked")
+  public BuilderT property(String name, Object value) {
+    if (value != null) {
+      properties.put(name, value);
+    } else {
+      properties.remove(name);
+    }
+    return (BuilderT) this;
+  }
+
+  @SuppressWarnings("unchecked")
+  public BuilderT properties(Map<String, Object> properties) {
+    for (Map.Entry<String, Object> property : properties.entrySet())
+      property(property.getKey(), property.getValue());
+    return (BuilderT) this;
+  }
+
+  protected Map<String, Object> properties() {
+    // TODO I'd really like this to be unmodifiable...
+    return properties;
+  }
+
+  protected ModelHttpRequestHead build() {
+    return new ModelHttpRequestHead(version(), method(),
+        Optional.ofNullable(url()).map(UrlBuilderT::build)
+            .orElseThrow(() -> new IllegalStateException("no url")),
+        Optional.ofNullable(headers()).map(HeadersBuilderT::build)
+            .orElseThrow(() -> new IllegalStateException("no headers")),
+        properties());
   }
 
   protected abstract UrlBuilderT newUrlBuilder();

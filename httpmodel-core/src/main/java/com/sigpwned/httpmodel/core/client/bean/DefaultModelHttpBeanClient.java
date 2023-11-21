@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import java.util.Optional;
 import com.sigpwned.httpmodel.core.client.DefaultModelHttpClientBase;
 import com.sigpwned.httpmodel.core.client.ModelHttpClient;
 import com.sigpwned.httpmodel.core.client.connector.ModelHttpConnector;
+import com.sigpwned.httpmodel.core.client.connector.UrlConnectionModelHttpConnector;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
@@ -47,6 +48,10 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
   private final List<ModelHttpBeanClientRequestMapper<?>> requestMappers;
   private final List<ModelHttpBeanClientResponseMapper<?>> responseMappers;
   private final List<ModelHttpBeanClientExceptionMapper> exceptionMappers;
+
+  public DefaultModelHttpBeanClient() {
+    this(new UrlConnectionModelHttpConnector());
+  }
 
   public DefaultModelHttpBeanClient(ModelHttpConnector connector) {
     super(connector);
@@ -86,9 +91,9 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
 
     ModelHttpResponse httpResponse;
     try (ModelHttpRequest httpRequest = doMapRequest(httpRequestHead, request)) {
-      httpRequestHead = ModelHttpRequestHead.fromRequest(httpRequest);
-
       doRequestInterceptors(httpRequest);
+
+      httpRequestHead = ModelHttpRequestHead.fromRequest(httpRequest);
 
       httpResponse = doSend(httpRequest);
     }
@@ -102,9 +107,16 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
 
       doResponseInterceptors(httpResponse);
 
-      IOException problem = doMapException(httpRequestHead, httpResponse);
-      if (problem != null)
-        throw problem;
+      Exception problem = doMapException(httpRequestHead, httpResponse);
+      if (problem != null) {
+        if (problem instanceof RuntimeException) {
+          throw (RuntimeException) problem;
+        } else if (problem instanceof IOException) {
+          throw (IOException) problem;
+        } else {
+          throw new IOException(problem);
+        }
+      }
 
       maybeResponse =
           Optional.ofNullable(doMapResponse(httpRequestHead, httpResponse, responseType));
@@ -135,13 +147,16 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
 
   /**
    * hook
+   *
+   * @throws IOException
    */
-  protected IOException doMapException(ModelHttpRequestHead httpRequestHead,
-      ModelHttpResponse httpResponseHead) {
+  protected Exception doMapException(ModelHttpRequestHead httpRequestHead,
+      ModelHttpResponse httpResponseHead) throws IOException {
     for (ModelHttpBeanClientExceptionMapper exceptionMapper : getExceptionMappers()) {
-      IOException problem = exceptionMapper.mapException(httpRequestHead, httpResponseHead);
-      if (problem != null)
+      Exception problem = exceptionMapper.mapException(httpRequestHead, httpResponseHead);
+      if (problem != null) {
         return problem;
+      }
     }
     return null;
   }

@@ -63,7 +63,11 @@ public abstract class ModelHttpResponseHeadBuilderBase<HeadersBuilderT extends M
   public BuilderT headers(ModelHttpHeaders newHeaders) {
     if (headers == null)
       headers = newHeadersBuilder();
-    headers.assign(newHeaders);
+    if (newHeaders != null) {
+      headers.assign(newHeaders);
+    } else {
+      headers.clear();
+    }
     return (BuilderT) this;
   }
 

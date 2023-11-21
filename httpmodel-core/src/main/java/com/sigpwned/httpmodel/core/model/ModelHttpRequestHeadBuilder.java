@@ -33,8 +33,9 @@ public class ModelHttpRequestHeadBuilder extends
     headers(value.getHeaders());
   }
 
+  @Override
   public ModelHttpRequestHead build() {
-    return new ModelHttpRequestHead(version(), method(), url().build(), headers().build());
+    return super.build();
   }
 
   @Override

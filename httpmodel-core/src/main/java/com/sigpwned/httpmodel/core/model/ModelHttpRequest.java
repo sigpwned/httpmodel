@@ -19,8 +19,12 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.io.ByteFilterSource;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
@@ -50,20 +54,33 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
 
   private ModelHttpHeaders headers;
 
+  /**
+   * This is not part of HTTP. Rather, it is used by applications to store arbitrary state on the
+   * request during processing.
+   */
+  private Map<String, Object> properties;
+
   public ModelHttpRequest(ModelHttpRequestHead head) throws IOException {
     this(head, (InputStream) null);
   }
 
   public ModelHttpRequest(ModelHttpRequestHead head, ModelHttpEntity entity) throws IOException {
-    this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(), entity);
+    this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(),
+        head.getProperties(), entity);
   }
 
   public ModelHttpRequest(ModelHttpRequestHead head, InputStream entity) throws IOException {
-    this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(), entity);
+    this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(),
+        head.getProperties(), entity);
   }
 
   public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
       ModelHttpEntity entity) throws IOException {
+    this(version, method, url, headers, emptyMap(), entity);
+  }
+
+  public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
+      Map<String, Object> properties, ModelHttpEntity entity) throws IOException {
     this(version, method, url,
         entity != null
             ? headers.toBuilder()
@@ -71,11 +88,16 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
                     entity.getContentType().toString())
                 .build()
             : null,
-        entity != null ? entity.toInputStream() : null);
+        properties, entity != null ? entity.toInputStream() : null);
   }
 
   public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
       InputStream entity) throws IOException {
+    this(version, method, url, headers, emptyMap(), entity);
+  }
+
+  public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,
+      Map<String, Object> properties, InputStream entity) throws IOException {
     super(entity);
     if (version == null)
       throw new NullPointerException();
@@ -85,10 +107,13 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
       throw new NullPointerException();
     if (headers == null)
       throw new NullPointerException();
+    if (properties == null)
+      throw new NullPointerException();
     this.version = version.toUpperCase();
     this.method = method.toUpperCase();
     this.url = url;
     this.headers = headers;
+    this.properties = new HashMap<>(properties);
   }
 
   public String getVersion() {
@@ -145,6 +170,22 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
 
   public void encode(ByteFilterSource filterSource) throws IOException {
     filter(filterSource);
+  }
+
+  public Optional<Object> getProperty(String name) {
+    return Optional.ofNullable(properties.get(name));
+  }
+
+  public void setProperty(String name, Object value) {
+    if (value != null) {
+      properties.put(name, value);
+    } else {
+      properties.remove(name);
+    }
+  }
+
+  public Map<String, Object> getProperties() {
+    return unmodifiableMap(properties);
   }
 
   @Override

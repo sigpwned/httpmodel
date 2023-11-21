@@ -140,7 +140,11 @@ public abstract class ModelHttpUrlBuilderBase<QueryStringBuilderT extends ModelH
   public BuilderT queryString(ModelHttpQueryString newQueryString) {
     if (queryString == null)
       queryString = newQueryStringBuilder();
-    queryString.assign(newQueryString);
+    if (newQueryString != null) {
+      queryString.assign(newQueryString);
+    } else {
+      queryString.clear();
+    }
     return (BuilderT) this;
   }
 
@@ -149,12 +153,13 @@ public abstract class ModelHttpUrlBuilderBase<QueryStringBuilderT extends ModelH
     scheme(url.getScheme());
     authority(url.getAuthority());
     path(url.getPath());
-    queryString(newQueryStringBuilder().assign(url.getQueryString()));
+    queryString(url.getQueryString());
     return (BuilderT) this;
   }
 
   protected ModelHttpUrl build() {
-    return new ModelHttpUrl(scheme(), authority(), path(), queryString().build());
+    return new ModelHttpUrl(scheme(), authority(), path(),
+        Optional.ofNullable(queryString()).map(QueryStringBuilderT::build).orElse(null));
   }
 
   protected abstract QueryStringBuilderT newQueryStringBuilder();

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,13 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
@@ -31,7 +36,7 @@ public class ModelHttpRequestHead {
 
   public static ModelHttpRequestHead fromRequest(ModelHttpRequest request) {
     return new ModelHttpRequestHead(request.getVersion(), request.getMethod(), request.getUrl(),
-        request.getHeaders());
+        request.getHeaders(), request.getProperties());
   }
 
   /**
@@ -48,8 +53,18 @@ public class ModelHttpRequestHead {
 
   private ModelHttpHeaders headers;
 
+  /**
+   * Not related to HTTP. Used to store arbitrary state during processing.
+   */
+  private Map<String, Object> properties;
+
   public ModelHttpRequestHead(String version, String method, ModelHttpUrl url,
       ModelHttpHeaders headers) {
+    this(version, method, url, headers, emptyMap());
+  }
+
+  public ModelHttpRequestHead(String version, String method, ModelHttpUrl url,
+      ModelHttpHeaders headers, Map<String, Object> properties) {
     if (version == null)
       throw new NullPointerException();
     if (method == null)
@@ -58,14 +73,17 @@ public class ModelHttpRequestHead {
       throw new NullPointerException();
     if (headers == null)
       throw new NullPointerException();
+    if (properties == null)
+      throw new NullPointerException();
     this.version = version;
     this.method = method;
     this.url = url;
     this.headers = headers;
+    this.properties = new HashMap<>(properties);
   }
 
   /* default */ ModelHttpRequestHead(ModelHttpRequestHeadBuilder b) {
-    this(b.version(), b.method(), b.url().build(), b.headers().build());
+    this(b.version(), b.method(), b.url().build(), b.headers().build(), b.properties());
   }
 
   public String getVersion() {
@@ -118,6 +136,22 @@ public class ModelHttpRequestHead {
 
   public ModelHttpRequest toRequest(InputStream entity) throws IOException {
     return new ModelHttpRequest(this, entity);
+  }
+
+  public Optional<Object> getProperty(String name) {
+    return Optional.ofNullable(properties.get(name));
+  }
+
+  public void setProperty(String name, Object value) {
+    if (value != null) {
+      properties.put(name, value);
+    } else {
+      properties.remove(name);
+    }
+  }
+
+  public Map<String, Object> getProperties() {
+    return unmodifiableMap(properties);
   }
 
   @Override

@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import com.sigpwned.httpmodel.core.model.ModelHttpQueryString.Parameter;
 import com.sigpwned.httpmodel.core.util.ModelHttpEncodings;
+import com.sigpwned.httpmodel.core.util.MoreStreams;
 
 /**
  * Models an HTTP query string, e.g., alpha=bravo&amp;charlie=delta
@@ -182,8 +183,21 @@ public class ModelHttpQueryString implements Iterable<Parameter> {
     return stream().filter(p -> p.getName().equals(name)).findFirst();
   }
 
+  public Optional<String> findFirstParameterValueByName(String name) {
+    return findFirstParameterByName(name).flatMap(Parameter::getValue);
+  }
+
   public List<Parameter> findAllParametersByName(String name) {
-    return stream().filter(p -> p.getName().equals(name)).collect(toList());
+    return findAllParametersByNameAsStream(name).collect(toList());
+  }
+
+  public List<String> findAllParameterValuesByName(String name) {
+    return findAllParametersByNameAsStream(name).flatMap(p -> MoreStreams.stream(p.getValue()))
+        .collect(toList());
+  }
+
+  private Stream<Parameter> findAllParametersByNameAsStream(String name) {
+    return stream().filter(p -> p.getName().equals(name));
   }
 
   public ModelHttpQueryString addParameterFirst(String name, String value) {

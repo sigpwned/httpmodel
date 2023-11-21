@@ -20,6 +20,7 @@
 package com.sigpwned.httpmodel.core.model;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,6 +46,14 @@ public class ModelHttpUrl {
       return fromUrl(new URL(s));
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException("must be a valid URL");
+    }
+  }
+
+  public static ModelHttpUrl fromUri(URI uri) {
+    try {
+      return fromUrl(uri.toURL());
+    } catch (MalformedURLException e) {
+      throw new IllegalArgumentException(uri.toString(), e);
     }
   }
 
@@ -89,6 +98,8 @@ public class ModelHttpUrl {
       throw new NullPointerException();
     if (path == null)
       throw new NullPointerException();
+    if (path.equals(""))
+      path = "/";
     if (!path.startsWith("/"))
       throw new IllegalArgumentException("path must be absolute");
     this.scheme = scheme;
@@ -149,10 +160,14 @@ public class ModelHttpUrl {
    */
   public URL toUrl() {
     try {
-      return new URL(toString());
+      return toUri().toURL();
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException("not a valid URL");
     }
+  }
+
+  public URI toUri() {
+    return URI.create(toString());
   }
 
   @Override

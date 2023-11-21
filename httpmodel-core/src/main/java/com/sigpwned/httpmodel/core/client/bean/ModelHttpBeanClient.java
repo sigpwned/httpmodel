@@ -20,6 +20,10 @@
 package com.sigpwned.httpmodel.core.client.bean;
 
 import java.io.IOException;
+import com.sigpwned.httpmodel.core.ModelHttpRequestFilter;
+import com.sigpwned.httpmodel.core.ModelHttpRequestInterceptor;
+import com.sigpwned.httpmodel.core.ModelHttpResponseFilter;
+import com.sigpwned.httpmodel.core.ModelHttpResponseInterceptor;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpUrl;
 
@@ -56,6 +60,22 @@ public interface ModelHttpBeanClient extends AutoCloseable {
 
   public <RequestT, ResponseT> ResponseT send(ModelHttpRequestHead requestHead, RequestT request,
       Class<ResponseT> responseType) throws IOException;
+
+  public void addRequestFilter(ModelHttpRequestFilter requestFilter);
+
+  public void removeRequestFilter(ModelHttpRequestFilter requestFilter);
+
+  public void addRequestInterceptor(ModelHttpRequestInterceptor requestInterceptor);
+
+  public void removeRequestInterceptor(ModelHttpRequestInterceptor requestInterceptor);
+
+  public void addResponseFilter(ModelHttpResponseFilter responseFilter);
+
+  public void removeResponseFilter(ModelHttpResponseFilter responseFilter);
+
+  public void addResponseInterceptor(ModelHttpResponseInterceptor responseInterceptor);
+
+  public void removeResponseInterceptor(ModelHttpResponseInterceptor responseInterceptor);
 
   public void registerRequestMapper(ModelHttpBeanClientRequestMapper<?> requestMapper);
 

@@ -31,13 +31,6 @@ import com.sigpwned.httpmodel.core.util.ModelHttpURLConnections;
 public class UrlConnectionModelHttpConnector implements ModelHttpConnector {
   @Override
   public ModelHttpResponse send(ModelHttpRequest request) throws IOException {
-    ModelHttpResponse result;
-    HttpURLConnection cn = ModelHttpURLConnections.toRequest(request);
-    try {
-      result = ModelHttpURLConnections.fromResponse(cn);
-    } finally {
-      cn.disconnect();
-    }
-    return result;
+    return ModelHttpURLConnections.fromResponse(ModelHttpURLConnections.toRequest(request));
   }
 }

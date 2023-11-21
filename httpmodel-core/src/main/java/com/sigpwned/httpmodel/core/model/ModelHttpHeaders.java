@@ -132,8 +132,20 @@ public class ModelHttpHeaders implements Iterable<Header> {
     return stream().filter(h -> h.getName().equalsIgnoreCase(name)).findFirst();
   }
 
+  public Optional<String> findFirstHeaderValueByName(String name) {
+    return findFirstHeaderByName(name).map(Header::getValue);
+  }
+
   public List<Header> findAllHeadersByName(String name) {
-    return stream().filter(h -> h.getName().equalsIgnoreCase(name)).collect(toList());
+    return findAllHeadersByNameAsStream(name).collect(toList());
+  }
+
+  public List<String> findAllHeaderValuesByName(String name) {
+    return findAllHeadersByNameAsStream(name).map(Header::getValue).collect(toList());
+  }
+
+  private Stream<Header> findAllHeadersByNameAsStream(String name) {
+    return stream().filter(h -> h.getName().equalsIgnoreCase(name));
   }
 
   public ModelHttpHeaders addHeaderFirst(String name, String value) {
