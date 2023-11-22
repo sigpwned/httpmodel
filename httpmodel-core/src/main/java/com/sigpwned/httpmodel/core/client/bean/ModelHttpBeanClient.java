@@ -38,6 +38,7 @@ import com.sigpwned.httpmodel.core.model.ModelHttpUrl;
  *
  * <ol>
  * <li>Run request filters</li>
+ * <li>Run bean request filters</li>
  * <li>Map request bean to HTTP request entity</li>
  * <li>Run request interceptors</li>
  * <li>Send request and receive response</li>
@@ -45,6 +46,7 @@ import com.sigpwned.httpmodel.core.model.ModelHttpUrl;
  * <li>Run response interceptors</li>
  * <li>Run exception mappers</li>
  * <li>Map HTTP response entity to response bean</li>
+ * <li>Run bean response filters</li>
  * </ol>
  *
  * <p>
@@ -65,6 +67,10 @@ public interface ModelHttpBeanClient extends AutoCloseable {
 
   public void removeRequestFilter(ModelHttpRequestFilter requestFilter);
 
+  public void addBeanRequestFilter(ModelHttpBeanClientRequestFilter beanRequestFilter);
+
+  public void removeBeanRequestFilter(ModelHttpBeanClientRequestFilter beanRequestFilter);
+
   public void addRequestInterceptor(ModelHttpRequestInterceptor requestInterceptor);
 
   public void removeRequestInterceptor(ModelHttpRequestInterceptor requestInterceptor);
@@ -76,6 +82,10 @@ public interface ModelHttpBeanClient extends AutoCloseable {
   public void addResponseInterceptor(ModelHttpResponseInterceptor responseInterceptor);
 
   public void removeResponseInterceptor(ModelHttpResponseInterceptor responseInterceptor);
+
+  public void addBeanResponseFilter(ModelHttpBeanClientResponseFilter beanResponseFilter);
+
+  public void removeBeanResponseFilter(ModelHttpBeanClientResponseFilter beanResponseFilter);
 
   public void registerRequestMapper(ModelHttpBeanClientRequestMapper<?> requestMapper);
 

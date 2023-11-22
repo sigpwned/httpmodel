@@ -31,6 +31,7 @@ import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
+import com.sigpwned.httpmodel.core.util.MorePropertiesBearing;
 
 /**
  * Models an HTTP request
@@ -66,12 +67,12 @@ public class ModelHttpRequest extends ModelHttpEntityInputStream {
 
   public ModelHttpRequest(ModelHttpRequestHead head, ModelHttpEntity entity) throws IOException {
     this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(),
-        head.getProperties(), entity);
+        MorePropertiesBearing.toMap(head), entity);
   }
 
   public ModelHttpRequest(ModelHttpRequestHead head, InputStream entity) throws IOException {
     this(head.getVersion(), head.getMethod(), head.getUrl(), head.getHeaders(),
-        head.getProperties(), entity);
+        MorePropertiesBearing.toMap(head), entity);
   }
 
   public ModelHttpRequest(String version, String method, ModelHttpUrl url, ModelHttpHeaders headers,

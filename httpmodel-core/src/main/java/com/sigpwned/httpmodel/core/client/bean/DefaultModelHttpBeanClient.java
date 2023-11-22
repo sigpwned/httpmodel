@@ -21,6 +21,7 @@ package com.sigpwned.httpmodel.core.client.bean;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.client.DefaultModelHttpClientBase;
@@ -45,6 +46,8 @@ import com.sigpwned.httpmodel.core.util.ModelHttpHeaderNames;
  */
 public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
     implements ModelHttpBeanClient {
+  private final List<ModelHttpBeanClientRequestFilter> beanRequestFilters;
+  private final List<ModelHttpBeanClientResponseFilter> beanResponseFilters;
   private final List<ModelHttpBeanClientRequestMapper<?>> requestMappers;
   private final List<ModelHttpBeanClientResponseMapper<?>> responseMappers;
   private final List<ModelHttpBeanClientExceptionMapper> exceptionMappers;
@@ -55,9 +58,43 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
 
   public DefaultModelHttpBeanClient(ModelHttpConnector connector) {
     super(connector);
+    this.beanRequestFilters = new ArrayList<>();
+    this.beanResponseFilters = new ArrayList<>();
     this.requestMappers = new ArrayList<>();
     this.responseMappers = new ArrayList<>();
     this.exceptionMappers = new ArrayList<>();
+  }
+
+  private static final Comparator<ModelHttpBeanClientRequestFilter> BEAN_CLIENT_REQUEST_FILTER_COMPARATOR =
+      Comparator.comparingInt(ModelHttpBeanClientRequestFilter::priority);
+
+  @Override
+  public void addBeanRequestFilter(ModelHttpBeanClientRequestFilter beanRequestFilter) {
+    if (beanRequestFilter == null)
+      throw new NullPointerException();
+    beanRequestFilters.add(beanRequestFilter);
+    beanRequestFilters.sort(BEAN_CLIENT_REQUEST_FILTER_COMPARATOR);
+  }
+
+  @Override
+  public void removeBeanRequestFilter(ModelHttpBeanClientRequestFilter beanRequestFilter) {
+    beanRequestFilters.remove(beanRequestFilter);
+  }
+
+  private static final Comparator<ModelHttpBeanClientResponseFilter> BEAN_CLIENT_RESPONSE_FILTER_COMPARATOR =
+      Comparator.comparingInt(ModelHttpBeanClientResponseFilter::priority);
+
+  @Override
+  public void addBeanResponseFilter(ModelHttpBeanClientResponseFilter beanResponseFilter) {
+    if (beanResponseFilter == null)
+      throw new NullPointerException();
+    beanResponseFilters.add(beanResponseFilter);
+    beanResponseFilters.sort(BEAN_CLIENT_RESPONSE_FILTER_COMPARATOR);
+  }
+
+  @Override
+  public void removeBeanResponseFilter(ModelHttpBeanClientResponseFilter beanResponseFilter) {
+    beanResponseFilters.remove(beanResponseFilter);
   }
 
   @Override
@@ -86,11 +123,13 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
 
   @Override
   public <RequestT, ResponseT> ResponseT send(ModelHttpRequestHead httpRequestHead,
-      RequestT request, Class<ResponseT> responseType) throws IOException {
+      RequestT beanRequest, Class<ResponseT> beanResponseType) throws IOException {
     doRequestFilters(httpRequestHead);
 
+    doBeanRequestFilters(httpRequestHead, beanRequest);
+
     ModelHttpResponse httpResponse;
-    try (ModelHttpRequest httpRequest = doMapRequest(httpRequestHead, request)) {
+    try (ModelHttpRequest httpRequest = doMapRequest(httpRequestHead, beanRequest)) {
       doRequestInterceptors(httpRequest);
 
       httpRequestHead = ModelHttpRequestHead.fromRequest(httpRequest);
@@ -98,7 +137,7 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
       httpResponse = doSend(httpRequest);
     }
 
-    Optional<ResponseT> maybeResponse = null;
+    Optional<ResponseT> maybeBeanResponse = null;
     try {
       ModelHttpResponseHead httpResponseHead =
           new ModelHttpResponseHead(httpResponse.getStatusCode(), httpResponse.getHeaders());
@@ -118,31 +157,53 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
         }
       }
 
-      maybeResponse =
-          Optional.ofNullable(doMapResponse(httpRequestHead, httpResponse, responseType));
+      maybeBeanResponse =
+          Optional.ofNullable(doMapResponse(httpRequestHead, httpResponse, beanResponseType));
+
+      httpResponseHead = ModelHttpResponseHead.fromResponse(httpResponse);
+
+      doBeanResponseFilters(httpRequestHead, beanRequest, httpResponseHead,
+          maybeBeanResponse.orElse(null));
     } finally {
-      if (maybeResponse == null)
+      if (maybeBeanResponse == null)
         httpResponse.close();
     }
 
-    return maybeResponse.orElse(null);
+    return maybeBeanResponse.orElse(null);
   }
 
   /**
    * hook
    */
-  protected <RequestT> ModelHttpRequest doMapRequest(ModelHttpRequestHead requestHead,
-      RequestT request) throws IOException {
-    if (request == null)
-      return new ModelHttpRequest(requestHead);
+  protected void doBeanRequestFilters(ModelHttpRequestHead httpRequestHead, Object requestBean) {
+    for (ModelHttpBeanClientRequestFilter filter : getBeanRequestFilters())
+      filter.filter(httpRequestHead, requestBean);
+  }
+
+  /**
+   * hook
+   */
+  protected void doBeanResponseFilters(ModelHttpRequestHead httpRequestHead, Object requestBean,
+      ModelHttpResponseHead httpResponseHead, Object responseBean) {
+    for (ModelHttpBeanClientResponseFilter filter : getBeanResponseFilters())
+      filter.filter(httpRequestHead, requestBean, httpResponseHead, responseBean);
+  }
+
+  /**
+   * hook
+   */
+  protected <RequestT> ModelHttpRequest doMapRequest(ModelHttpRequestHead httpRequestHead,
+      RequestT requestBean) throws IOException {
+    if (requestBean == null)
+      return new ModelHttpRequest(httpRequestHead);
     // TODO What if there is no mapper?
     ModelHttpMediaType contentType =
-        requestHead.getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
+        httpRequestHead.getHeaders().findFirstHeaderByName(ModelHttpHeaderNames.CONTENT_TYPE)
             .map(Header::getValue).map(ModelHttpMediaType::fromString).orElse(null);
     Optional<ModelHttpBeanClientRequestMapper<RequestT>> maybeRequestMapper =
-        findRequestMapperForRequest(request, contentType);
+        findRequestMapperForRequest(requestBean, contentType);
     ModelHttpBeanClientRequestMapper<RequestT> requestMapper = maybeRequestMapper.get();
-    return requestMapper.mapRequest(requestHead, request);
+    return requestMapper.mapRequest(httpRequestHead, requestBean);
   }
 
   /**
@@ -179,27 +240,35 @@ public class DefaultModelHttpBeanClient extends DefaultModelHttpClientBase
   /**
    * hook
    */
-  protected ModelHttpResponse doSend(ModelHttpRequest request) throws IOException {
-    return getConnector().send(request);
+  protected ModelHttpResponse doSend(ModelHttpRequest httpRequest) throws IOException {
+    return getConnector().send(httpRequest);
   }
 
   @SuppressWarnings("unchecked")
-  protected <T> Optional<ModelHttpBeanClientRequestMapper<T>> findRequestMapperForRequest(T request,
-      ModelHttpMediaType contentType) {
-    if (request == null)
+  protected <T> Optional<ModelHttpBeanClientRequestMapper<T>> findRequestMapperForRequest(
+      T requestBean, ModelHttpMediaType contentType) {
+    if (requestBean == null)
       throw new NullPointerException();
-    Class<T> requestType = (Class<T>) request.getClass();
+    Class<T> requestType = (Class<T>) requestBean.getClass();
     return getRequestMappers().stream().filter(m -> m.isMappable(requestType, contentType))
         .map(m -> (ModelHttpBeanClientRequestMapper<T>) m).findFirst();
   }
 
   @SuppressWarnings("unchecked")
   protected <T> Optional<ModelHttpBeanClientResponseMapper<T>> findResponseMapperForResponseType(
-      Class<T> responseType, ModelHttpMediaType contentType) {
-    if (responseType == null)
+      Class<T> responseBeanType, ModelHttpMediaType contentType) {
+    if (responseBeanType == null)
       throw new NullPointerException();
-    return getResponseMappers().stream().filter(m -> m.isMappable(responseType, contentType))
+    return getResponseMappers().stream().filter(m -> m.isMappable(responseBeanType, contentType))
         .map(m -> (ModelHttpBeanClientResponseMapper<T>) m).findFirst();
+  }
+
+  private List<ModelHttpBeanClientRequestFilter> getBeanRequestFilters() {
+    return beanRequestFilters;
+  }
+
+  private List<ModelHttpBeanClientResponseFilter> getBeanResponseFilters() {
+    return beanResponseFilters;
   }
 
   private List<ModelHttpBeanClientRequestMapper<?>> getRequestMappers() {

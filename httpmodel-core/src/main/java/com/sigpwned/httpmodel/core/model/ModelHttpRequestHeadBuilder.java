@@ -19,6 +19,8 @@
  */
 package com.sigpwned.httpmodel.core.model;
 
+import com.sigpwned.httpmodel.core.util.MorePropertiesBearing;
+
 /**
  * Models an HTTP request
  */
@@ -31,6 +33,7 @@ public class ModelHttpRequestHeadBuilder extends
     method(value.getMethod());
     url(value.getUrl());
     headers(value.getHeaders());
+    properties(MorePropertiesBearing.toMap(value));
   }
 
   @Override

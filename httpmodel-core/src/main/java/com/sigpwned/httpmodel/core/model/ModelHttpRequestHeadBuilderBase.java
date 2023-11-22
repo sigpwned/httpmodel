@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
+import com.sigpwned.httpmodel.core.util.MorePropertiesBearing;
 
 /**
  * Models an HTTP request
@@ -57,7 +58,7 @@ public abstract class ModelHttpRequestHeadBuilderBase<QueryStringBuilderT extend
     this.method = that.getMethod();
     this.url = that.getUrl() != null ? newUrlBuilder().assign(that.getUrl()) : null;
     this.headers = newHeadersBuilder().assign(that.getHeaders());
-    this.properties = new HashMap<>(that.getProperties());
+    this.properties = new HashMap<>(MorePropertiesBearing.toMap(that));
   }
 
 
@@ -139,7 +140,6 @@ public abstract class ModelHttpRequestHeadBuilderBase<QueryStringBuilderT extend
   }
 
   protected Map<String, Object> properties() {
-    // TODO I'd really like this to be unmodifiable...
     return properties;
   }
 

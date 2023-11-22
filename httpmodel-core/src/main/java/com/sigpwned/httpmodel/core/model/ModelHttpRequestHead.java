@@ -20,16 +20,17 @@
 package com.sigpwned.httpmodel.core.model;
 
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import com.sigpwned.httpmodel.core.util.ModelHttpMethods;
 import com.sigpwned.httpmodel.core.util.ModelHttpVersions;
 
-public class ModelHttpRequestHead {
+public class ModelHttpRequestHead implements PropertiesBearing {
   public static ModelHttpRequestHeadBuilder builder() {
     return new ModelHttpRequestHeadBuilder();
   }
@@ -138,10 +139,12 @@ public class ModelHttpRequestHead {
     return new ModelHttpRequest(this, entity);
   }
 
+  @Override
   public Optional<Object> getProperty(String name) {
     return Optional.ofNullable(properties.get(name));
   }
 
+  @Override
   public void setProperty(String name, Object value) {
     if (value != null) {
       properties.put(name, value);
@@ -150,8 +153,9 @@ public class ModelHttpRequestHead {
     }
   }
 
-  public Map<String, Object> getProperties() {
-    return unmodifiableMap(properties);
+  @Override
+  public Set<String> getPropertyNames() {
+    return unmodifiableSet(properties.keySet());
   }
 
   @Override
