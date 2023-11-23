@@ -61,6 +61,10 @@ public final class ModelHttpURLConnections {
       request.getContentType().ifPresent(contentType -> {
         result.setRequestProperty(ModelHttpHeaderNames.CONTENT_TYPE, contentType.toString());
       });
+      request.length().ifPresent(contentLength -> {
+        result.setRequestProperty(ModelHttpHeaderNames.CONTENT_LENGTH,
+            Long.toString(contentLength));
+      });
 
       result.setDoOutput(true);
 

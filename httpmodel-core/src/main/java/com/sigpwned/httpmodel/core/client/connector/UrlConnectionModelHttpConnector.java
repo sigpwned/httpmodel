@@ -30,7 +30,22 @@ import com.sigpwned.httpmodel.core.util.ModelHttpURLConnections;
  */
 public class UrlConnectionModelHttpConnector implements ModelHttpConnector {
   @Override
-  public ModelHttpResponse send(ModelHttpRequest request) throws IOException {
-    return ModelHttpURLConnections.fromResponse(ModelHttpURLConnections.toRequest(request));
+  public ModelHttpResponse send(ModelHttpRequest modelRequest) throws IOException {
+    return ModelHttpURLConnections.fromResponse(transformRequest(modelRequest));
   }
+
+  /**
+   * hook
+   */
+  protected HttpURLConnection transformRequest(ModelHttpRequest modelRequest) throws IOException {
+    return ModelHttpURLConnections.toRequest(modelRequest);
+  }
+
+  /**
+   * hook
+   */
+  protected ModelHttpResponse transformResponse(HttpURLConnection httpResponse) throws IOException {
+    return ModelHttpURLConnections.fromResponse(httpResponse);
+  }
+
 }
