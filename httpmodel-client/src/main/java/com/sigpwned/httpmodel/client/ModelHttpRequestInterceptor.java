@@ -17,19 +17,23 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.client.bean;
+package com.sigpwned.httpmodel.client;
 
-import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
+import java.io.IOException;
+import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 
-public interface ModelHttpBeanClientRequestFilter {
+/**
+ * Customize an HTTP request version, method, URL, headers, or body.
+ */
+public interface ModelHttpRequestInterceptor {
   public static final int DEFAULT_PRIORITY = 1000000;
 
   /**
-   * Filters are run in order of increasing priority
+   * Interceptors are run in order of increasing priority
    */
   default int priority() {
     return DEFAULT_PRIORITY;
   }
 
-  public void filter(ModelHttpRequestHead httpRequestHead, Object requestBean);
+  public void intercept(ModelHttpRequest request) throws IOException;
 }

@@ -7,35 +7,15 @@
         <version>1.0.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>httpmodel-java11-client</artifactId>
-    <name>httpmodel-java11-client</name>
-
-    <properties>
-        <java.version>11</java.version>
-    </properties>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <release>${java.version}</release>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <artifactId>httpmodel-client</artifactId>
+    <name>httpmodel-client</name>
 
     <dependencies>
         <dependency>
             <groupId>com.sigpwned</groupId>
-            <artifactId>httpmodel-client</artifactId>
+            <artifactId>httpmodel-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

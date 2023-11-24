@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.client;
+package com.sigpwned.httpmodel.client.impl;
 
 
 
@@ -26,11 +26,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import com.sigpwned.httpmodel.core.ModelHttpRequestFilter;
-import com.sigpwned.httpmodel.core.ModelHttpRequestInterceptor;
-import com.sigpwned.httpmodel.core.ModelHttpResponseFilter;
-import com.sigpwned.httpmodel.core.ModelHttpResponseInterceptor;
-import com.sigpwned.httpmodel.core.client.connector.ModelHttpConnector;
+import com.sigpwned.httpmodel.client.ModelHttpConnector;
+import com.sigpwned.httpmodel.client.ModelHttpRequestFilter;
+import com.sigpwned.httpmodel.client.ModelHttpRequestInterceptor;
+import com.sigpwned.httpmodel.client.ModelHttpResponseFilter;
+import com.sigpwned.httpmodel.client.ModelHttpResponseInterceptor;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;

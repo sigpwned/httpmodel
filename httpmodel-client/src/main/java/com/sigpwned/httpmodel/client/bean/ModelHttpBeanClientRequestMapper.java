@@ -17,16 +17,15 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.client.bean;
+package com.sigpwned.httpmodel.client.bean;
 
 import java.io.IOException;
 import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
+import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
-import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 
-public interface ModelHttpBeanClientResponseMapper<T> {
-  public boolean isMappable(Class<?> responseType, ModelHttpMediaType contentType);
+public interface ModelHttpBeanClientRequestMapper<T> {
+  public boolean isMappable(Class<?> requestType, ModelHttpMediaType contentType);
 
-  public T mapResponse(ModelHttpRequestHead httpRequestHead, ModelHttpResponse httpResponse)
-      throws IOException;
+  public ModelHttpRequest mapRequest(ModelHttpRequestHead requestHead, T value) throws IOException;
 }

@@ -17,17 +17,23 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.client.bean;
+package com.sigpwned.httpmodel.client.bean.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import com.sigpwned.httpmodel.core.client.DefaultModelHttpClientBase;
-import com.sigpwned.httpmodel.core.client.ModelHttpClient;
-import com.sigpwned.httpmodel.core.client.connector.ModelHttpConnector;
-import com.sigpwned.httpmodel.core.client.connector.UrlConnectionModelHttpConnector;
+import com.sigpwned.httpmodel.client.ModelHttpClient;
+import com.sigpwned.httpmodel.client.ModelHttpConnector;
+import com.sigpwned.httpmodel.client.bean.ModelHttpBeanClient;
+import com.sigpwned.httpmodel.client.bean.ModelHttpBeanClientExceptionMapper;
+import com.sigpwned.httpmodel.client.bean.ModelHttpBeanClientRequestFilter;
+import com.sigpwned.httpmodel.client.bean.ModelHttpBeanClientRequestMapper;
+import com.sigpwned.httpmodel.client.bean.ModelHttpBeanClientResponseFilter;
+import com.sigpwned.httpmodel.client.bean.ModelHttpBeanClientResponseMapper;
+import com.sigpwned.httpmodel.client.connector.UrlConnectionModelHttpConnector;
+import com.sigpwned.httpmodel.client.impl.DefaultModelHttpClientBase;
 import com.sigpwned.httpmodel.core.model.ModelHttpHeaders.Header;
 import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;

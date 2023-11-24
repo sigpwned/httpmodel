@@ -17,23 +17,23 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.client;
 
 import java.io.IOException;
-import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
+import com.sigpwned.httpmodel.core.model.ModelHttpResponseHead;
 
 /**
- * Customize an HTTP response status code, headers, or body.
+ * Customize an HTTP response status code or headers. Cannot touch response body.
  */
-public interface ModelHttpResponseInterceptor {
+public interface ModelHttpResponseFilter {
   public static final int DEFAULT_PRIORITY = 1000000;
 
   /**
-   * Interceptors are run in order of increasing priority
+   * Filters are run in order of increasing priority
    */
   default int priority() {
     return DEFAULT_PRIORITY;
   }
 
-  public void intercept(ModelHttpResponse response) throws IOException;
+  public void filter(ModelHttpResponseHead responseHead) throws IOException;
 }

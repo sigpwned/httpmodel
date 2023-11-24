@@ -17,35 +17,13 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.client.connector;
+package com.sigpwned.httpmodel.client.bean;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
+import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
-import com.sigpwned.httpmodel.core.util.ModelHttpURLConnections;
 
-/**
- * A connector implemented using {@link HttpURLConnection}.
- */
-public class UrlConnectionModelHttpConnector implements ModelHttpConnector {
-  @Override
-  public ModelHttpResponse send(ModelHttpRequest modelRequest) throws IOException {
-    return ModelHttpURLConnections.fromResponse(transformRequest(modelRequest));
-  }
-
-  /**
-   * hook
-   */
-  protected HttpURLConnection transformRequest(ModelHttpRequest modelRequest) throws IOException {
-    return ModelHttpURLConnections.toRequest(modelRequest);
-  }
-
-  /**
-   * hook
-   */
-  protected ModelHttpResponse transformResponse(HttpURLConnection httpResponse) throws IOException {
-    return ModelHttpURLConnections.fromResponse(httpResponse);
-  }
-
+public interface ModelHttpBeanClientExceptionMapper {
+  public Exception mapException(ModelHttpRequestHead httpRequestHead,
+      ModelHttpResponse httpResponse) throws IOException;
 }

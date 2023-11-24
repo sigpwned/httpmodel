@@ -17,11 +17,10 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.client.connector;
+package com.sigpwned.httpmodel.client;
 
 import java.io.IOException;
-import com.sigpwned.httpmodel.core.client.ModelHttpClient;
-import com.sigpwned.httpmodel.core.client.bean.ModelHttpBeanClient;
+import com.sigpwned.httpmodel.client.bean.ModelHttpBeanClient;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 

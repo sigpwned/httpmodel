@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,15 +17,12 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core;
+package com.sigpwned.httpmodel.client.bean;
 
-import java.io.IOException;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
+import com.sigpwned.httpmodel.core.model.ModelHttpResponseHead;
 
-/**
- * Customize an HTTP request version, method, URL, or headers. Cannot change request body.
- */
-public interface ModelHttpRequestFilter {
+public interface ModelHttpBeanClientResponseFilter {
   public static final int DEFAULT_PRIORITY = 1000000;
 
   /**
@@ -35,5 +32,6 @@ public interface ModelHttpRequestFilter {
     return DEFAULT_PRIORITY;
   }
 
-  public void filter(ModelHttpRequestHead requestHead) throws IOException;
+  public void filter(ModelHttpRequestHead httpRequestHead, Object requestBean,
+      ModelHttpResponseHead httpResponseHead, Object responseBean);
 }

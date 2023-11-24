@@ -8,8 +8,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import com.sigpwned.httpmodel.client.ModelHttpConnector;
 import com.sigpwned.httpmodel.client.java11.util.Java11ModelHttpClients;
-import com.sigpwned.httpmodel.core.client.connector.ModelHttpConnector;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequest;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,13 +17,23 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.client.bean;
+package com.sigpwned.httpmodel.client;
 
 import java.io.IOException;
-import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
 import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 
-public interface ModelHttpBeanClientExceptionMapper {
-  public Exception mapException(ModelHttpRequestHead httpRequestHead,
-      ModelHttpResponse httpResponse) throws IOException;
+/**
+ * Customize an HTTP response status code, headers, or body.
+ */
+public interface ModelHttpResponseInterceptor {
+  public static final int DEFAULT_PRIORITY = 1000000;
+
+  /**
+   * Interceptors are run in order of increasing priority
+   */
+  default int priority() {
+    return DEFAULT_PRIORITY;
+  }
+
+  public void intercept(ModelHttpResponse response) throws IOException;
 }

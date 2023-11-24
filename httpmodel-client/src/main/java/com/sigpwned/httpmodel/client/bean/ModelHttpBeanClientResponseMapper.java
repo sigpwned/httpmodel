@@ -17,21 +17,16 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.core.client.bean;
+package com.sigpwned.httpmodel.client.bean;
 
+import java.io.IOException;
+import com.sigpwned.httpmodel.core.model.ModelHttpMediaType;
 import com.sigpwned.httpmodel.core.model.ModelHttpRequestHead;
-import com.sigpwned.httpmodel.core.model.ModelHttpResponseHead;
+import com.sigpwned.httpmodel.core.model.ModelHttpResponse;
 
-public interface ModelHttpBeanClientResponseFilter {
-  public static final int DEFAULT_PRIORITY = 1000000;
+public interface ModelHttpBeanClientResponseMapper<T> {
+  public boolean isMappable(Class<?> responseType, ModelHttpMediaType contentType);
 
-  /**
-   * Filters are run in order of increasing priority
-   */
-  default int priority() {
-    return DEFAULT_PRIORITY;
-  }
-
-  public void filter(ModelHttpRequestHead httpRequestHead, Object requestBean,
-      ModelHttpResponseHead httpResponseHead, Object responseBean);
+  public T mapResponse(ModelHttpRequestHead httpRequestHead, ModelHttpResponse httpResponse)
+      throws IOException;
 }
