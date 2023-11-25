@@ -74,3 +74,5 @@ To grab a copy of the Yahoo! frontpage, use this code:
             System.out.println(response.toString(StandardCharsets.UTF_8));
         }
     }
+
+This requires the `httpmodel-client` module.
