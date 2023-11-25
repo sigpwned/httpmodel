@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.jakarta.servlet.util;
+package com.sigpwned.httpmodel.servlet.jakarta.util;
 
 import static java.util.Collections.emptyEnumeration;
 import static org.hamcrest.CoreMatchers.is;

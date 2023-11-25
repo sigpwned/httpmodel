@@ -17,7 +17,7 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.httpmodel.jakarta.servlet.util;
+package com.sigpwned.httpmodel.servlet.jakarta.util;
 
 import java.io.IOException;
 import java.io.InputStream;
