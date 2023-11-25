@@ -2,19 +2,22 @@
 
 ## Motivation
 
-Many HTTP operations, like signing requests, are library agnostic and require requests to be resident in memory. Implementing these operations against multiple library implementations is wasteful and can be difficult for libraries designed to work with large request and response bodies. The httpmodel library is designed to allow library writers to build library-agnostic models once, and then simply allow users to convert their models back and forth between the httpmodel object model.
+Many HTTP operations, like signing requests, are library agnostic. Implementing these operations against multiple libraries is wasteful. The httpmodel library is designed to allow library writers to build library-agnostic models once, and then simply allow users to convert their models back and forth between the httpmodel object model.
+
+The httpmodel library also offers a client SPI with interchangeable transport backends for those who prefer to do work using the model itself.
 
 ## Goals
 
 * Define a library-agnostic model of HTTP primitive objects, like requests, headers, etc.
 * Provide conversion routines between the model and the most popular HTTP client and server libraries
+* Expose a simple HTTP client to use the model directly
 
 ## Non-Goals
 
-* Build a new HTTP client implementation
+* Build a new HTTP implementation
 * Support all HTTP libraries
 
-## Examples
+## Conversion Examples
 
 ### Servlets
 
@@ -57,3 +60,17 @@ Users can convert back and forth between `HttpURLConnection` objects like this:
     }
 
 This requires the `httpmodel-core` module.
+
+## HTTP Client Examples
+
+To grab a copy of the Yahoo! frontpage, use this code:
+
+    try (ModelHttpClient client=new DefaultModelHttpClient(new UrlConnectionModelHttpConnector())) {
+        try (ModelHttpResponse response=client.send(ModelHttpRequest.builder()
+                .method(ModelHttpMethods.GET)
+                .url(URI.create("https://www.yahoo.com/"))
+                .build())) {
+            System.out.println(response.getStatusCode());
+            System.out.println(response.toString(StandardCharsets.UTF_8));
+        }
+    }
