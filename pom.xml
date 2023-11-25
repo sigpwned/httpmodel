@@ -64,7 +64,8 @@
         <sonar.organization>sigpwned</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
-        <junit.version>4.13.2</junit.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <junit.version>5.10.1</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
         <mockito.version>4.5.1</mockito.version>
     </properties>
@@ -118,6 +119,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-bom</artifactId>
+                <version>${slf4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-bom</artifactId>
                 <version>${mockito.version}</version>
@@ -127,7 +135,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.10.1</version>
+                <version>${junit.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
