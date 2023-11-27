@@ -1,4 +1,4 @@
-# HTTPMODEL [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sigpwned/httpmodel-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sigpwned/httpmodel-core)
+# HTTPMODEL [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.sigpwned/httpmodel-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.sigpwned/httpmodel-core) [![tests](https://github.com/sigpwned/httpmodel/actions/workflows/tests.yml/badge.svg)](https://github.com/sigpwned/httpmodel/actions/workflows/tests.yml)
 
 ## Motivation
 
